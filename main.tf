@@ -1,44 +1,41 @@
-data "aws_iam_policy_document" "ecr" {
+data "aws_iam_policy_document" "assume_role" {
   statement {
-    sid    = "node"
-    effect = "Allow"
+    sid     = "EC2AssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
 
-    principals {
-      type = "AWS"
-
-      identifiers = [
-        "${var.node_arns}",
-      ]
+    principals = {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
     }
-
-    actions = [
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage",
-      "ecr:InitiateLayerUpload",
-      "ecr:UploadLayerPart",
-      "ecr:CompleteLayerUpload",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:DescribeImages",
-      "ecr:DeleteRepository",
-    ]
   }
+}
 
+data "aws_iam_policy_document" "token" {
   statement {
-    sid    = "user"
+    sid     = "ECRGetAuthorizationToken"
+    effect  = "Allow"
+    actions = ["ecr:GetAuthorizationToken"]
+
+    resources = ["${aws_ecr_repository.default.arn}"]
+  }
+}
+
+data "aws_iam_policy_document" "resource" {
+  statement {
+    sid    = "nodes"
     effect = "Allow"
 
-    principals {
+    principals = {
       type = "AWS"
 
       identifiers = [
-        "${var.user_arns}",
+        "${var.principals}",
       ]
     }
 
     actions = [
+      "ecr:GetAuthorizationToken",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
       "ecr:BatchCheckLayerAvailability",
@@ -47,13 +44,9 @@ data "aws_iam_policy_document" "ecr" {
       "ecr:UploadLayerPart",
       "ecr:CompleteLayerUpload",
       "ecr:DescribeRepositories",
-      "ecr:GetRepositoryPolicy",
       "ecr:ListImages",
       "ecr:DescribeImages",
       "ecr:DeleteRepository",
-      "ecr:BatchDeleteImage",
-      "ecr:SetRepositoryPolicy",
-      "ecr:DeleteRepositoryPolicy",
     ]
   }
 }
@@ -69,7 +62,28 @@ resource "aws_ecr_repository" "default" {
   name = "${module.label.id}"
 }
 
-resource "aws_ecr_repository_policy" "policy" {
+resource "aws_ecr_repository_policy" "default" {
   repository = "${aws_ecr_repository.default.name}"
-  policy     = "${data.aws_iam_policy_document.ecr.json}"
+  policy     = "${data.aws_iam_policy_document.resource.json}"
+}
+
+resource "aws_iam_policy" "default" {
+  name        = "${module.label.id}"
+  description = "Allow IAM Users have to access to call ecr:GetAuthorizationToken"
+  policy      = "${data.aws_iam_policy_document.token.json}"
+}
+
+resource "aws_iam_role" "default" {
+  name               = "${module.label.id}"
+  assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
+}
+
+resource "aws_iam_role_policy_attachment" "default" {
+  role       = "${aws_iam_role.default.name}"
+  policy_arn = "${aws_iam_policy.default.arn}"
+}
+
+resource "aws_iam_instance_profile" "default" {
+  name = "${module.label.id}"
+  role = "${aws_iam_role.default.name}"
 }

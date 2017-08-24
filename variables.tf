@@ -11,15 +11,8 @@ variable "stage" {
   default = ""
 }
 
-variable "node_arns" {
-  type = "list"
-  description = "Principal ARN of EC2 node to provide with access to the ECR"
+variable "principals" {
+  type        = "list"
+  description = "Principal ARNs to provide with access to the ECR"
   default     = []
 }
-
-variable "user_arns" {
-  type = "list"
-  description = "Principal ARN of users to provide with access to the ECR"
-  default     = []
-}
-

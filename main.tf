@@ -1,6 +1,6 @@
 data "aws_iam_role" "default" {
-  count     = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
-  role_name = "${element(var.roles, count.index)}"
+  count = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
+  name  = "${element(var.roles, count.index)}"
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -116,7 +116,7 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 
 resource "aws_iam_policy" "default" {
   name        = "${module.label.id}"
-  description = "Allow IAM Users have to access to call ecr:GetAuthorizationToken"
+  description = "Allow IAM Users to call ecr:GetAuthorizationToken"
   policy      = "${data.aws_iam_policy_document.token.json}"
 }
 

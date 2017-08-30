@@ -9,4 +9,3 @@ variable "roles" {
   description = "Principal IAM roles to provide with access to the ECR"
   default     = []
 }
-

@@ -1,6 +1,6 @@
 data "aws_iam_role" "default" {
-  count = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
-  name  = "${element(var.roles, count.index)}"
+  count     = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
+  role_name = "${element(var.roles, count.index)}"
 }
 
 data "aws_iam_policy_document" "assume_role" {

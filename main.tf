@@ -1,3 +1,8 @@
+data "aws_iam_role" "default" {
+  count = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
+  name  = "${element(var.roles, count.index)}"
+}
+
 data "aws_iam_policy_document" "assume_role" {
   statement {
     sid     = "EC2AssumeRole"
@@ -21,16 +26,18 @@ data "aws_iam_policy_document" "token" {
   }
 }
 
-data "aws_iam_policy_document" "resource" {
+data "aws_iam_policy_document" "default_ecr" {
+  count = "${signum(length(var.roles)) == 1 ? 0 : 1}"
+
   statement {
-    sid    = "nodes"
+    sid    = "ecr"
     effect = "Allow"
 
     principals = {
       type = "AWS"
 
       identifiers = [
-        "${var.principals}",
+        "${aws_iam_role.default.arn}",
       ]
     }
 
@@ -46,7 +53,37 @@ data "aws_iam_policy_document" "resource" {
       "ecr:DescribeRepositories",
       "ecr:ListImages",
       "ecr:DescribeImages",
-      "ecr:DeleteRepository",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "resource" {
+  count = "${signum(length(var.roles)) == 1 ? 1 : 0}"
+
+  statement {
+    sid    = "ecr"
+    effect = "Allow"
+
+    principals = {
+      type = "AWS"
+
+      identifiers = [
+        "${data.aws_iam_role.default.*.arn}",
+      ]
+    }
+
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:DescribeImages",
     ]
   }
 }
@@ -63,8 +100,15 @@ resource "aws_ecr_repository" "default" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
+  count      = "${signum(length(var.roles)) == 1 ? 1 : 0}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
+}
+
+resource "aws_ecr_repository_policy" "default_ecr" {
+  count      = "${signum(length(var.roles)) == 1 ? 0 : 1}"
+  repository = "${aws_ecr_repository.default.name}"
+  policy     = "${data.aws_iam_policy_document.default_ecr.json}"
 }
 
 resource "aws_iam_policy" "default" {
@@ -74,16 +118,25 @@ resource "aws_iam_policy" "default" {
 }
 
 resource "aws_iam_role" "default" {
+  count              = "${signum(length(var.roles)) == 1 ? 0 : 1}"
   name               = "${module.label.id}"
   assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
 }
 
-resource "aws_iam_role_policy_attachment" "default" {
+resource "aws_iam_role_policy_attachment" "default_ecr" {
+  count      = "${signum(length(var.roles)) == 1 ? 0 : 1}"
   role       = "${aws_iam_role.default.name}"
   policy_arn = "${aws_iam_policy.default.arn}"
 }
 
+resource "aws_iam_role_policy_attachment" "default" {
+  count      = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
+  role       = "${element(var.roles, count.index)}"
+  policy_arn = "${aws_iam_policy.default.arn}"
+}
+
 resource "aws_iam_instance_profile" "default" {
-  name = "${module.label.id}"
-  role = "${aws_iam_role.default.name}"
+  count = "${signum(length(var.roles)) == 1 ? 0 : 1}"
+  name  = "${module.label.id}"
+  role  = "${aws_iam_role.default.name}"
 }

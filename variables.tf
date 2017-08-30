@@ -1,18 +1,12 @@
-variable "name" {
-  description = "Name of the repository"
-  default     = ""
-}
+variable "name" {}
 
-variable "namespace" {
-  default = ""
-}
+variable "namespace" {}
 
-variable "stage" {
-  default = ""
-}
+variable "stage" {}
 
-variable "principals" {
+variable "roles" {
   type        = "list"
-  description = "Principal ARNs to provide with access to the ECR"
+  description = "Principal IAM roles to provide with access to the ECR"
   default     = []
 }
+

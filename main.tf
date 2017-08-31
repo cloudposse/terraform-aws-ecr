@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "default_ecr" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  count = "${signum(length(var.roles)) == 1 ? 1 : 0}"
+  count = "${signum(length(var.roles))}"
 
   statement {
     sid    = "ecr"
@@ -103,7 +103,7 @@ resource "aws_ecr_repository" "default" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${signum(length(var.roles)) == 1 ? 1 : 0}"
+  count      = "${signum(length(var.roles))}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

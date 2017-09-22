@@ -1,5 +1,6 @@
-# tf_ecr
-This module creates an AWS ECR Docker Container registry.
+# terraform-aws-ecr
+
+Terraform module to provision an [`AWS ECR Docker Container registry`](https://aws.amazon.com/ecr/).
 
 
 ## Usage
@@ -14,14 +15,15 @@ In addition, an `EC2 Instance Profile` will be created from the new IAM Role, wh
 
 
 Include this repository as a module in your existing terraform code:
-```
+
+```hcl
 # IAM Role is provided. It will be granted ECR permissions
 data "aws_iam_role" "ecr" {
   name = "ecr"
 }
 
 module "ecr" {
-  source              = "git::https://github.com/cloudposse/tf_ecr.git?ref=tags/0.1.0"
+  source              = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
   name                = "${var.name}"
   namespace           = "${var.namespace}"
   stage               = "${var.stage}"
@@ -33,17 +35,22 @@ module "ecr" {
 ## Variables
 
 |  Name                        |  Default       |  Description                                                                                             | Required|
-|:----------------------------:|:--------------:|:--------------------------------------------------------------------------------------------------------:|:-------:|
-| `namespace`                  | `global`       | Namespace (e.g. `cp` or `cloudposse`) - required for `tf_label` module                                   | Yes     |
-| `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging` - required for `tf_label` module                                    | Yes     |
-| `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`) - required for `tf_label` module                                          | Yes     |
-| `roles`                      | []             | List of IAM role names that will be granted permissions to use the container registry              | No (optional)     |
+|:----------------------------:|:--------------:|:--------------------------------------------------------------------------------------------------------:|:-------------:|
+| `namespace`                  | `global`       | Namespace (e.g. `cp` or `cloudposse`) - required for `tf_label` module                                   | Yes           |
+| `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging` - required for `tf_label` module                                    | Yes           |
+| `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`) - required for `tf_label` module   | Yes           |
+| `roles`                      | `[]`           | List of IAM role names that will be granted permissions to use the container registry                    | No (optional) |
 
 
 ## Outputs
 
-| Name                | Decription                                                                              |
+| Name                | Description                                                                              |
 |:-------------------:|:---------------------------------------------------------------------------------------:|
 | `registry_id`       | ID of the created AWS Container Registry                                                    |
 | `registry_url`      | URL to the created AWS Container Registry                                                   |
 | `role_name`         | (Optional) The name of the newly created IAM role that has access to the registry                                    |
+
+
+## License
+
+Apache 2 License. See [`LICENSE`](LICENSE) for full details.

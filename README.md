@@ -1,4 +1,4 @@
-# terraform-aws-ecr
+# terraform-aws-ecr [![Build Status](https://travis-ci.org/cloudposse/terraform-aws-ecr.svg)](https://travis-ci.org/cloudposse/terraform-aws-ecr)
 
 Terraform module to provision an [`AWS ECR Docker Container registry`](https://aws.amazon.com/ecr/).
 
@@ -36,9 +36,9 @@ module "ecr" {
 
 |  Name                        |  Default       |  Description                                                                                             | Required|
 |:----------------------------:|:--------------:|:--------------------------------------------------------------------------------------------------------:|:-------------:|
-| `namespace`                  | `global`       | Namespace (e.g. `cp` or `cloudposse`) - required for `tf_label` module                                   | Yes           |
-| `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging` - required for `tf_label` module                                    | Yes           |
-| `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`) - required for `tf_label` module   | Yes           |
+| `namespace`                  | `global`       | Namespace (e.g. `cp` or `cloudposse`)                                                                    | Yes           |
+| `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging`)                                                                    | Yes           |
+| `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`)                                    | Yes           |
 | `roles`                      | `[]`           | List of IAM role names that will be granted permissions to use the container registry                    | No (optional) |
 
 

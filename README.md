@@ -44,11 +44,11 @@ module "ecr" {
 
 ## Outputs
 
-| Name                | Description                                                                              |
+| Name                | Description                                                                             |
 |:-------------------:|:---------------------------------------------------------------------------------------:|
-| `registry_id`       | ID of the created AWS Container Registry                                                    |
-| `registry_url`      | URL to the created AWS Container Registry                                                   |
-| `role_name`         | (Optional) The name of the newly created IAM role that has access to the registry                                    |
+| `registry_id`       | ID of the created AWS Container Registry                                                |
+| `registry_url`      | URL to the created AWS Container Registry                                               |
+| `role_name`         | (Optional) The name of the newly created IAM role that has access to the registry       |
 
 
 ## License

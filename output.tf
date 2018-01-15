@@ -11,5 +11,5 @@ output "repository_name" {
 }
 
 output "role_name" {
-  value = "${aws_iam_role.default.name}"
+  value = "${join("", aws_iam_role.default.*.name)}"
 }

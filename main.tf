@@ -143,3 +143,23 @@ resource "aws_iam_instance_profile" "default" {
   name  = "${module.label.id}"
   role  = "${aws_iam_role.default.name}"
 }
+
+resource "aws_ecr_lifecycle_policy" "default" {
+  repository = "${aws_ecr_repository.default.name}"
+  policy = <<EOF
+{
+  "rules": [{
+    "rulePriority": 1,
+    "description": "Rotate images when reach ${var.rotate_number} images stored",
+    "selection": {
+      "tagStatus": "untagged",
+      "countType": "imageCountMoreThan",
+      "countNumber": ${var.rotate_number}
+    },
+    "action": {
+      "type": "expire"
+    }
+  }]
+}
+EOF
+}

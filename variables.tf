@@ -24,3 +24,9 @@ variable "tags" {
   type    = "map"
   default = {}
 }
+
+variable "rotate_number" {
+  type    = "string"
+  description = "How many Docker Image versions AWS ECR will store"
+  default = "7"
+}

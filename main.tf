@@ -150,11 +150,11 @@ resource "aws_ecr_lifecycle_policy" "default" {
 {
   "rules": [{
     "rulePriority": 1,
-    "description": "Rotate images when reach ${var.rotate_number} images stored",
+    "description": "Rotate images when reach ${var.max_image_number} images stored",
     "selection": {
       "tagStatus": "untagged",
       "countType": "imageCountMoreThan",
-      "countNumber": ${var.rotate_number}
+      "countNumber": ${var.max_image_number}
     },
     "action": {
       "type": "expire"

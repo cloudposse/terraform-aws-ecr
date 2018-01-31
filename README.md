@@ -40,6 +40,7 @@ module "ecr" {
 | `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging`)                                                                    | Yes           |
 | `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`)                                    | Yes           |
 | `roles`                      | `[]`           | List of IAM role names that will be granted permissions to use the container registry                    | No (optional) |
+| `max_image_count`            | `7`            | How many Docker Image versions AWS ECR will store | Yes |
 
 
 ## Outputs

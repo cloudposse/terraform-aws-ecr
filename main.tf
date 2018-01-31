@@ -146,14 +146,14 @@ resource "aws_iam_instance_profile" "default" {
 
 resource "aws_ecr_lifecycle_policy" "default" {
   repository = "${aws_ecr_repository.default.name}"
-
   policy = <<EOF
 {
   "rules": [{
     "rulePriority": 1,
     "description": "Rotate images when reach ${var.max_image_count} images stored",
     "selection": {
-      "tagStatus": "untagged",
+      "tagStatus": "tagged",
+      "tagPrefixList": ["${var.stage}"],
       "countType": "imageCountMoreThan",
       "countNumber": ${var.max_image_count}
     },

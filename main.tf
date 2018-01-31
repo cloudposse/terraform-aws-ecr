@@ -146,6 +146,7 @@ resource "aws_iam_instance_profile" "default" {
 
 resource "aws_ecr_lifecycle_policy" "default" {
   repository = "${aws_ecr_repository.default.name}"
+
   policy = <<EOF
 {
   "rules": [{

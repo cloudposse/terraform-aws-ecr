@@ -35,7 +35,7 @@ module "ecr" {
 ## Variables
 
 |  Name                        |  Default       |  Description                                                                                             | Required|
-|:----------------------------:|:--------------:|:--------------------------------------------------------------------------------------------------------:|:-------------:|
+|:-----------------------------|:--------------:|:---------------------------------------------------------------------------------------------------------|:-------------:|
 | `namespace`                  | `global`       | Namespace (e.g. `cp` or `cloudposse`)                                                                    | Yes           |
 | `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging`)                                                                    | Yes           |
 | `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`)                                    | Yes           |
@@ -46,7 +46,7 @@ module "ecr" {
 ## Outputs
 
 | Name                | Description                                                                             |
-|:-------------------:|:---------------------------------------------------------------------------------------:|
+|:--------------------|:----------------------------------------------------------------------------------------|
 | `registry_id`       | ID of the created AWS Container Registry                                                |
 | `registry_url`      | URL to the created AWS Container Registry                                               |
 | `role_name`         | (Optional) The name of the newly created IAM role that has access to the registry       |

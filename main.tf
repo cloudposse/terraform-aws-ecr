@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "token" {
     effect  = "Allow"
     actions = ["ecr:GetAuthorizationToken"]
 
-    resources = ["${aws_ecr_repository.default.arn}"]
+    resources = ["*"]
   }
 }
 

@@ -144,19 +144,43 @@ resource "aws_iam_instance_profile" "default" {
   role  = "${aws_iam_role.default.name}"
 }
 
-resource "aws_ecr_lifecycle_policy" "default" {
+resource "aws_ecr_lifecycle_policy" "tagged" {
+  count      = "${var.create_tagged_lifecycle}"
   repository = "${aws_ecr_repository.default.name}"
 
   policy = <<EOF
 {
   "rules": [{
     "rulePriority": 1,
-    "description": "Rotate images when reach ${var.max_image_count} images stored",
+    "description": "Rotate images when reach ${var.max_tagged_image_count} images stored",
     "selection": {
       "tagStatus": "tagged",
       "tagPrefixList": ["${var.stage}"],
       "countType": "imageCountMoreThan",
-      "countNumber": ${var.max_image_count}
+      "countNumber": ${var.max_tagged_image_count}
+    },
+    "action": {
+      "type": "expire"
+    }
+  }]
+}
+EOF
+}
+
+resource "aws_ecr_lifecycle_policy" "untagged" {
+  count      = "${var.create_untagged_lifecycle}"
+  repository = "${aws_ecr_repository.default.name}"
+
+  policy = <<EOF
+{
+  "rules": [{
+    "rulePriority": 2,
+    "description": "Expire images older than ${var.max_untagged_image_count} days",
+    "selection": {
+      "tagStatus": "untagged",
+      "countType": "sinceImagePushed",
+      "countUnit": "days",
+      "countNumber": ${var.max_untagged_image_count}
     },
     "action": {
       "type": "expire"

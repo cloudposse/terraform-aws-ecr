@@ -34,14 +34,16 @@ module "ecr" {
 
 ## Variables
 
-|  Name                        |  Default       |  Description                                                                                             | Required|
-|:-----------------------------|:--------------:|:---------------------------------------------------------------------------------------------------------|:-------------:|
-| `namespace`                  | `global`       | Namespace (e.g. `cp` or `cloudposse`)                                                                    | Yes           |
-| `stage`                      | `default`      | Stage (e.g. `prod`, `dev`, `staging`)                                                                    | Yes           |
-| `name`                       | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`)                                    | Yes           |
-| `roles`                      | `[]`           | List of IAM role names that will be granted permissions to use the container registry                    | No (optional) |
-| `max_image_count`            | `7`            | How many Docker Image versions AWS ECR will store | Yes |
-
+|  Name                       |  Default       |  Description                                                                                             | Required|
+|:----------------------------|:--------------:|:---------------------------------------------------------------------------------------------------------|:-------------:|
+| `namespace`                 | `global`       | Namespace (e.g. `cp` or `cloudposse`)                                                                    | Yes           |
+| `stage`                     | `default`      | Stage (e.g. `prod`, `dev`, `staging`)                                                                    | Yes           |
+| `name`                      | `admin`        | The Name of the application or solution  (e.g. `bastion` or `portal`)                                    | Yes           |
+| `roles`                     | `[]`           | List of IAM role names that will be granted permissions to use the container registry                    | No (optional) |
+| `create_tagged_lifecycle`   | `false (0)`    | Create a lifecycle policy for tagged Docker Image versions?                                              | No (optional) |
+| `max_tagged_image_count`    | `7`            | How many tagged Docker Image versions AWS ECR will store                                                 | No (optional) |
+| `create_untagged_lifecycle` | `false (0)`    | Create a lifecycle policy for untagged Docker Image versions?                                            | No (optional) |
+| `max_untagged_image_count`  | `14`           | Number of days AWS ECR will store untagged Docker Image versions                                         | No (optional) |
 
 ## Outputs
 

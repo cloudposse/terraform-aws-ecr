@@ -26,11 +26,11 @@ variable "tags" {
 }
 
 variable "create_tagged_lifecycle" {
-  default = false
+  default = "false"
 }
 
 variable "create_untagged_lifecycle" {
-  default = false
+  default = "false"
 }
 
 variable "max_tagged_image_count" {
@@ -39,7 +39,7 @@ variable "max_tagged_image_count" {
   default     = "7"
 }
 
-variable "max_untagged_image_count" {
+variable "max_untagged_image_days" {
   type        = "string"
   description = "Number of days that ECR will store untagged Docker Image versions"
   default     = "14"

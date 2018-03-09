@@ -145,7 +145,7 @@ resource "aws_iam_instance_profile" "default" {
 }
 
 resource "aws_ecr_lifecycle_policy" "tagged" {
-  count      = "${var.create_tagged_lifecycle == "true" ? 1 : 0}"
+  count      = "${var.max_tagged_image_count != "0" ? 1 : 0}"
   repository = "${aws_ecr_repository.default.name}"
 
   policy = <<EOF
@@ -168,13 +168,13 @@ EOF
 }
 
 resource "aws_ecr_lifecycle_policy" "untagged" {
-  count      = "${var.create_untagged_lifecycle == "true" ? 1 : 0}"
+  count      = "${var.max_untagged_image_days != "0" ? 1 : 0}"
   repository = "${aws_ecr_repository.default.name}"
 
   policy = <<EOF
 {
   "rules": [{
-    "rulePriority": 2,
+    "rulePriority": 1,
     "description": "Expire images older than ${var.max_untagged_image_days} days",
     "selection": {
       "tagStatus": "untagged",

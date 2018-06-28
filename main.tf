@@ -28,13 +28,14 @@ data "aws_iam_policy_document" "login" {
 
 data "aws_iam_policy_document" "write" {
   statement {
-    sid     = "ECRGetAuthorizationToken"
-    effect  = "Allow"
+    sid    = "ECRGetAuthorizationToken"
+    effect = "Allow"
+
     actions = [
       "ecr:InitiateLayerUpload",
       "ecr:UploadLayerPart",
       "ecr:CompleteLayerUpload",
-      "ecr:PutImage"
+      "ecr:PutImage",
     ]
 
     resources = ["${aws_ecr_repository.default.arn}"]
@@ -43,8 +44,9 @@ data "aws_iam_policy_document" "write" {
 
 data "aws_iam_policy_document" "read" {
   statement {
-    sid     = "ECRGetAuthorizationToken"
-    effect  = "Allow"
+    sid    = "ECRGetAuthorizationToken"
+    effect = "Allow"
+
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
@@ -52,13 +54,12 @@ data "aws_iam_policy_document" "read" {
       "ecr:DescribeRepositories",
       "ecr:ListImages",
       "ecr:DescribeImages",
-      "ecr:BatchGetImage"
+      "ecr:BatchGetImage",
     ]
 
     resources = ["${aws_ecr_repository.default.arn}"]
   }
 }
-
 
 data "aws_iam_policy_document" "default_ecr" {
   count = "${signum(length(var.roles)) == 1 ? 0 : 1}"
@@ -160,13 +161,11 @@ resource "aws_iam_policy" "read" {
   policy      = "${data.aws_iam_policy_document.read.json}"
 }
 
-
 resource "aws_iam_policy" "write" {
   name        = "${module.label.id}${var.delimiter}write"
   description = "Allow IAM Users to pull from ECR"
   policy      = "${data.aws_iam_policy_document.write.json}"
 }
-
 
 resource "aws_iam_role" "default" {
   count              = "${signum(length(var.roles)) == 1 ? 0 : 1}"

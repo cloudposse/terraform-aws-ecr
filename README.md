@@ -31,7 +31,7 @@ module "ecr" {
 }
 ```
 
-Example of attaching polices to user (for CI/CD purpose)
+Example of attaching policies to a user for CI/CD
 
 ```hcl
 module "cicd_user" {

@@ -3,11 +3,11 @@ variable "name" {
 }
 
 variable "namespace" {
-  description = "Namespace (e.g. `cp` or `cloudposse`)   "
+  description = "Namespace (e.g. `cp` or `cloudposse`)"
 }
 
 variable "stage" {
-  description = "Stage (e.g. `prod`, `dev`, `staging`) "
+  description = "Stage (e.g. `prod`, `dev`, `staging`)"
 }
 
 variable "roles" {
@@ -31,7 +31,7 @@ variable "attributes" {
 variable "tags" {
   type        = "map"
   default     = {}
-  description = "Additional tags (e.g. `map('BusinessUnit`,`XYZ`)"
+  description = "Additional tags (e.g. `map('BusinessUnit','XYZ')`)"
 }
 
 variable "max_image_count" {

@@ -31,6 +31,35 @@ module "ecr" {
 }
 ```
 
+Example of attaching policies to a user for CI/CD
+
+```hcl
+module "cicd_user" {
+  source    = "git::https://github.com/cloudposse/terraform-aws-iam-system-user.git?ref=tags/0.3.0"
+  namespace = "${var.namespace}"
+  stage     = "${var.stage}"
+  name      = "codefresh"
+}
+
+resource "aws_iam_policy_attachment" "login" {
+  name       = "${module.cicd_user.user_name}-login"
+  users      = ["${module.cicd_user.user_name}"]
+  policy_arn = "${module.kops_ecr.policy_login_arn}"
+}
+
+resource "aws_iam_policy_attachment" "read" {
+  name       = "${module.cicd_user.user_name}-read"
+  users      = ["${module.cicd_user.user_name}"]
+  policy_arn = "${module.kops_ecr.policy_read_arn}"
+}
+
+resource "aws_iam_policy_attachment" "write" {
+  name       = "${module.cicd_user.user_name}-write"
+  users      = ["${module.cicd_user.user_name}"]
+  policy_arn = "${module.kops_ecr.policy_write_arn}"
+}
+```
+
 
 ## Variables
 

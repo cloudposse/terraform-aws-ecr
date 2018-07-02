@@ -1,8 +1,15 @@
-# Compiled files
-*.tfstate
-*.tfstate.backup
+#  Local .terraform directories
+**/.terraform/*
 
-# Module directory
-.terraform
-.idea
-*.iml
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+**/.idea
+**/*.iml
+
+**/.build-harness
+**/build-harness

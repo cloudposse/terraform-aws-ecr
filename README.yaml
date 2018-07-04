@@ -1,0 +1,113 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-aws-ecr
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/terraform-aws-ecr
+
+# Badges to display
+badges:
+  - name: "Build Status"
+    image: "https://travis-ci.org/cloudposse/terraform-aws-ecr.svg?branch=master"
+    url: "https://travis-ci.org/cloudposse/terraform-aws-ecr"
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-ecr.svg"
+    url: "https://travis-ci.org/cloudposse/terraform-aws-ecr/releases"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related:
+  - name: "terraform-aws-jenkins"
+    description: "Terraform module to build Docker image with Jenkins, save it to an ECR repo, and deploy to Elastic Beanstalk running Docker stack"
+    url: "https://github.com/cloudposse/terraform-aws-jenkins"
+  - name: "terraform-aws-kops-ecr"
+    description: "Terraform module to provision an ECR repository and grant users and kubernetes nodes access to it."
+    url: "https://github.com/cloudposse/terraform-aws-kops-ecr"
+
+# Short description of this project
+description: |-
+  Terraform module to provision an [`AWS ECR Docker Container registry`](https://aws.amazon.com/ecr/).
+
+# How to use this project
+usage: |-
+  The module works in two distinct modes:
+
+  1. If you provide the existing IAM Role names in the `roles` attribute, the Roles will be granted permissions to work with the created registry.
+
+  2. If the `roles` attribute is omitted or is an empty list, a new IAM Role will be created and granted all the required permissions to work with the registry.
+  The Role name will be assigned to the output variable `role_name`.
+  In addition, an `EC2 Instance Profile` will be created from the new IAM Role, which might be assigned to EC2 instances granting them permissions to work with the ECR registry.
+
+
+  Include this repository as a module in your existing terraform code:
+
+  ```hcl
+  # IAM Role is provided. It will be granted ECR permissions
+  data "aws_iam_role" "ecr" {
+    name = "ecr"
+  }
+
+  module "ecr" {
+    source              = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+    name                = "${var.name}"
+    namespace           = "${var.namespace}"
+    stage               = "${var.stage}"
+    roles               = ["${data.aws_iam_role.ecr.name}"]
+  }
+  ```
+
+  Example of attaching policies to a user for CI/CD
+
+  ```hcl
+  module "cicd_user" {
+    source    = "git::https://github.com/cloudposse/terraform-aws-iam-system-user.git?ref=tags/0.3.0"
+    namespace = "${var.namespace}"
+    stage     = "${var.stage}"
+    name      = "codefresh"
+  }
+
+  resource "aws_iam_policy_attachment" "login" {
+    name       = "${module.cicd_user.user_name}-login"
+    users      = ["${module.cicd_user.user_name}"]
+    policy_arn = "${module.kops_ecr.policy_login_arn}"
+  }
+
+  resource "aws_iam_policy_attachment" "read" {
+    name       = "${module.cicd_user.user_name}-read"
+    users      = ["${module.cicd_user.user_name}"]
+    policy_arn = "${module.kops_ecr.policy_read_arn}"
+  }
+
+  resource "aws_iam_policy_attachment" "write" {
+    name       = "${module.cicd_user.user_name}-write"
+    users      = ["${module.cicd_user.user_name}"]
+    policy_arn = "${module.kops_ecr.policy_write_arn}"
+  }
+  ```
+
+include:
+  - "docs/targets.md"
+  - "docs/terraform.md"
+
+# Contributors to this project
+contributors:
+  - name: "Igor Rodionov"
+    github: "goruha"
+  - name: "Andriy Knysh"
+    github: "aknysh"
+  - name: "Sergey Vasilyev"
+    github: "s2504s"
+  - name: "Ivan Pinatti"
+    github: "ivan-pinatti"

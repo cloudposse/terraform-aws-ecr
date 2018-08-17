@@ -157,13 +157,13 @@ resource "aws_iam_policy" "login" {
 
 resource "aws_iam_policy" "read" {
   name        = "${module.label.id}${var.delimiter}read"
-  description = "Allow IAM Users to push into ECR"
+  description = "Allow IAM Users to pull from ECR"
   policy      = "${data.aws_iam_policy_document.read.json}"
 }
 
 resource "aws_iam_policy" "write" {
   name        = "${module.label.id}${var.delimiter}write"
-  description = "Allow IAM Users to pull from ECR"
+  description = "Allow IAM Users to push into ECR"
   policy      = "${data.aws_iam_policy_document.write.json}"
 }
 

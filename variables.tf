@@ -10,6 +10,12 @@ variable "stage" {
   description = "Stage (e.g. `prod`, `dev`, `staging`)"
 }
 
+variable "use_fullname" {
+  type        = "string"
+  default     = "true"
+  description = "Set 'true' to use `cp-prod-bastion_image` for ecr repository name, else `bastion_image`"
+}
+
 variable "roles" {
   type        = "list"
   description = "Principal IAM roles to provide with access to the ECR"

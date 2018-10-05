@@ -134,7 +134,7 @@ module "label" {
 }
 
 resource "aws_ecr_repository" "default" {
-  name = "${module.label.id}"
+  name = "${var.use_fullname == "true" ? module.label.id : module.label.name}"
 }
 
 resource "aws_ecr_repository_policy" "default" {

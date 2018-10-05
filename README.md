@@ -90,8 +90,9 @@ resource "aws_iam_policy_attachment" "write" {
 ```
 Available targets:
 
-  help                                This help screen
+  help                                Help screen
   help/all                            Display help for all targets
+  help/short                          This help short screen
   lint                                Lint terraform code
 
 ```
@@ -108,6 +109,7 @@ Available targets:
 | roles | Principal IAM roles to provide with access to the ECR | list | `<list>` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | - | yes |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map | `<map>` | no |
+| use_fullname | Set 'true' to use `cp-prod-bastion_image` for ecr repository name, else `bastion_image` | string | `true` | no |
 
 ## Outputs
 

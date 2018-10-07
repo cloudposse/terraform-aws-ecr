@@ -11,7 +11,7 @@
 | roles | Principal IAM roles to provide with access to the ECR | list | `<list>` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | - | yes |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map | `<map>` | no |
-| use_fullname | Set 'true' to use `cp-prod-bastion_image` for ecr repository name, else `bastion_image` | string | `true` | no |
+| use_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | string | `true` | no |
 
 ## Outputs
 

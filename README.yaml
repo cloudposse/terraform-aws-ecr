@@ -81,19 +81,19 @@ usage: |-
   resource "aws_iam_policy_attachment" "login" {
     name       = "${module.cicd_user.user_name}-login"
     users      = ["${module.cicd_user.user_name}"]
-    policy_arn = "${module.kops_ecr.policy_login_arn}"
+    policy_arn = "${module.ecr.policy_login_arn}"
   }
 
   resource "aws_iam_policy_attachment" "read" {
     name       = "${module.cicd_user.user_name}-read"
     users      = ["${module.cicd_user.user_name}"]
-    policy_arn = "${module.kops_ecr.policy_read_arn}"
+    policy_arn = "${module.ecr.policy_read_arn}"
   }
 
   resource "aws_iam_policy_attachment" "write" {
     name       = "${module.cicd_user.user_name}-write"
     users      = ["${module.cicd_user.user_name}"]
-    policy_arn = "${module.kops_ecr.policy_write_arn}"
+    policy_arn = "${module.ecr.policy_write_arn}"
   }
   ```
 

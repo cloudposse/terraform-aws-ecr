@@ -11,12 +11,15 @@ name: terraform-aws-ecr
 tags:
   - aws
   - terraform
+  - terraform-modules
   - platform
   - ecr
+  - docker
+  - docker-registry
 
 # Categories of this project
 categories:
-  - terraform-platform
+  - terraform-modules/platform
 
 # Logo for this project
 #logo: docs/logo.png

@@ -16,15 +16,15 @@ variable "use_fullname" {
   description = "Set 'true' to use `namespace-stage-name` for ecr repository name, else `name`"
 }
 
-variable "roles" {
+variable "principal" {
   type        = "list"
-  description = "Principal IAM roles to provide with full access to the ECR"
+  description = "Principal ARN to provide with full access to the ECR"
   default     = []
 }
 
-variable "roles_readonly" {
+variable "principal_readonly" {
   type        = "list"
-  description = "Principal IAM roles to provide with readonly access to the ECR"
+  description = "Principal ARN to provide with readonly access to the ECR"
   default     = []
 }
 

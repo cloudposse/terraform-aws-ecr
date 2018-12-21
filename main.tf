@@ -1,25 +1,15 @@
 locals {
-  roles_read_count     = "${length(var.roles_readonly)}"
-  roles_read_non_empty = "${signum(length(var.roles_readonly))}"
-  roles_read_empty     = "${signum(length(var.roles_readonly)) == 0 ? 1 : 0}"
+  principal_read_count     = "${length(var.principal_readonly)}"
+  principal_read_non_empty = "${signum(length(var.principal_readonly))}"
+  principal_read_empty     = "${signum(length(var.principal_readonly)) == 0 ? 1 : 0}"
 
-  roles_full_count     = "${length(var.roles)}"
-  roles_full_non_empty = "${signum(length(var.roles))}"
-  roles_full_empty     = "${signum(length(var.roles)) == 0 ? 1 : 0}"
+  principal_full_count     = "${length(var.principal)}"
+  principal_full_non_empty = "${signum(length(var.principal))}"
+  principal_full_empty     = "${signum(length(var.principal)) == 0 ? 1 : 0}"
 
-  roles_count     = "${length(var.roles_readonly) + length(var.roles)}"
-  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles))}"
-  roles_empty     = "${signum(length(var.roles_readonly) + length(var.roles)) == 0 ? 1 : 0}"
-}
-
-data "aws_iam_role" "read" {
-  count = "${local.roles_read_non_empty ? local.roles_read_count: 0}"
-  name  = "${element(var.roles_readonly, count.index)}"
-}
-
-data "aws_iam_role" "full" {
-  count = "${local.roles_full_non_empty ? local.roles_full_count : 0}"
-  name  = "${element(var.roles, count.index)}"
+  principal_count     = "${length(var.principal_readonly) + length(var.principal)}"
+  principal_non_empty = "${signum(length(var.principal_readonly) + length(var.principal))}"
+  principal_empty     = "${signum(length(var.principal_readonly) + length(var.principal)) == 0 ? 1 : 0}"
 }
 
 module "label" {
@@ -63,7 +53,7 @@ EOF
 ## The role can be attached or assumed
 
 data "aws_iam_policy_document" "assume_role" {
-  count = "${local.roles_empty}"
+  count = "${local.principal_empty}"
 
   statement {
     sid     = "EC2AssumeRole"
@@ -78,20 +68,20 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "default" {
-  count              = "${local.roles_empty}"
+  count              = "${local.principal_empty}"
   name               = "${module.label.id}"
   assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
 }
 
 resource "aws_iam_instance_profile" "default" {
-  count = "${local.roles_empty}"
+  count = "${local.principal_empty}"
   name  = "${module.label.id}"
   role  = "${aws_iam_role.default.name}"
 }
 
 ## Grant access to default role
 data "aws_iam_policy_document" "default_ecr" {
-  count = "${local.roles_empty}"
+  count = "${local.principal_empty}"
 
   statement {
     sid    = "ecr"
@@ -121,7 +111,7 @@ data "aws_iam_policy_document" "default_ecr" {
 }
 
 resource "aws_ecr_repository_policy" "default_ecr" {
-  count      = "${local.roles_empty}"
+  count      = "${local.principal_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.default_ecr.json}"
 }
@@ -130,7 +120,7 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 ## Grant access to them
 
 data "aws_iam_policy_document" "resource_readonly" {
-  count = "${local.roles_read_non_empty}"
+  count = "${local.principal_read_non_empty}"
 
   statement {
     sid    = "readonly"
@@ -140,7 +130,7 @@ data "aws_iam_policy_document" "resource_readonly" {
       type = "AWS"
 
       identifiers = [
-        "${data.aws_iam_role.read.*.arn}",
+        "${var.principal_readonly}",
       ]
     }
 
@@ -158,14 +148,14 @@ data "aws_iam_policy_document" "resource_readonly" {
 }
 
 resource "aws_ecr_repository_policy" "default_readonly" {
-  count      = "${local.roles_read_non_empty}"
+  count      = "${local.principal_read_non_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource_readonly.json}"
 }
 
 
 data "aws_iam_policy_document" "resource" {
-  count = "${local.roles_full_non_empty}"
+  count = "${local.principal_full_non_empty}"
 
   statement {
     sid    = "full"
@@ -175,7 +165,7 @@ data "aws_iam_policy_document" "resource" {
       type = "AWS"
 
       identifiers = [
-        "${data.aws_iam_role.full.*.arn}",
+        "${var.principal}",
       ]
     }
 
@@ -197,7 +187,7 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${local.roles_full_non_empty}"
+  count      = "${local.principal_full_non_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

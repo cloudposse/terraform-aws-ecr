@@ -165,7 +165,7 @@ resource "aws_ecr_repository_policy" "default_readonly" {
 
 
 data "aws_iam_policy_document" "resource" {
-  count = "${local.roles_full_count}"
+  count = "${local.roles_full_non_empty}"
 
   statement {
     sid    = "full"

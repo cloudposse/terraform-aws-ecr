@@ -1,126 +1,26 @@
-data "aws_iam_role" "default" {
-  count = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
+locals {
+  roles_read_count = "${length(var.roles_readonly)}"
+  roles_read_non_empty = "${signum(length(var.roles_readonly)) == 1}"
+  roles_read_empty = "${signum(length(var.roles_readonly)) == 0}"
+
+  roles_full_count = "${length(var.roles)}"
+  roles_full_non_empty = "${signum(length(var.roles)) == 1}"
+  roles_full_empty = "${signum(length(var.roles)) == 0}"
+
+  roles_count = "${length(var.roles_readonly) + length(var.roles)}"
+  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles)) == 1}"
+  roles_empty = "${signum(length(var.roles_readonly) + length(var.roles)) == 0}"
+
+}
+
+data "aws_iam_role" "read" {
+  count = "${local.roles_non_empty ? local.roles_read_count: 0}"
+  name  = "${element(var.roles_readonly, count.index)}"
+}
+
+data "aws_iam_role" "full" {
+  count = "${local.roles_full_non_empty ? local.roles_full_count : 0}"
   name  = "${element(var.roles, count.index)}"
-}
-
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    sid     = "EC2AssumeRole"
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals = {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "login" {
-  statement {
-    sid     = "ECRGetAuthorizationToken"
-    effect  = "Allow"
-    actions = ["ecr:GetAuthorizationToken"]
-
-    resources = ["*"]
-  }
-}
-
-data "aws_iam_policy_document" "write" {
-  statement {
-    sid    = "ECRGetAuthorizationToken"
-    effect = "Allow"
-
-    actions = [
-      "ecr:InitiateLayerUpload",
-      "ecr:UploadLayerPart",
-      "ecr:CompleteLayerUpload",
-      "ecr:PutImage",
-    ]
-
-    resources = ["${aws_ecr_repository.default.arn}"]
-  }
-}
-
-data "aws_iam_policy_document" "read" {
-  statement {
-    sid    = "ECRGetAuthorizationToken"
-    effect = "Allow"
-
-    actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetRepositoryPolicy",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:DescribeImages",
-      "ecr:BatchGetImage",
-    ]
-
-    resources = ["${aws_ecr_repository.default.arn}"]
-  }
-}
-
-data "aws_iam_policy_document" "default_ecr" {
-  count = "${signum(length(var.roles)) == 1 ? 0 : 1}"
-
-  statement {
-    sid    = "ecr"
-    effect = "Allow"
-
-    principals = {
-      type = "AWS"
-
-      identifiers = [
-        "${aws_iam_role.default.arn}",
-      ]
-    }
-
-    actions = [
-      "ecr:GetAuthorizationToken",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage",
-      "ecr:InitiateLayerUpload",
-      "ecr:UploadLayerPart",
-      "ecr:CompleteLayerUpload",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:DescribeImages",
-    ]
-  }
-}
-
-data "aws_iam_policy_document" "resource" {
-  count = "${signum(length(var.roles))}"
-
-  statement {
-    sid    = "ecr"
-    effect = "Allow"
-
-    principals = {
-      type = "AWS"
-
-      identifiers = [
-        "${data.aws_iam_role.default.*.arn}",
-      ]
-    }
-
-    actions = [
-      "ecr:GetAuthorizationToken",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage",
-      "ecr:InitiateLayerUpload",
-      "ecr:UploadLayerPart",
-      "ecr:CompleteLayerUpload",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:DescribeImages",
-    ]
-  }
 }
 
 module "label" {
@@ -135,60 +35,6 @@ module "label" {
 
 resource "aws_ecr_repository" "default" {
   name = "${var.use_fullname == "true" ? module.label.id : module.label.name}"
-}
-
-resource "aws_ecr_repository_policy" "default" {
-  count      = "${signum(length(var.roles))}"
-  repository = "${aws_ecr_repository.default.name}"
-  policy     = "${data.aws_iam_policy_document.resource.json}"
-}
-
-resource "aws_ecr_repository_policy" "default_ecr" {
-  count      = "${signum(length(var.roles)) == 1 ? 0 : 1}"
-  repository = "${aws_ecr_repository.default.name}"
-  policy     = "${data.aws_iam_policy_document.default_ecr.json}"
-}
-
-resource "aws_iam_policy" "login" {
-  name        = "${module.label.id}${var.delimiter}login"
-  description = "Allow IAM Users to call ecr:GetAuthorizationToken"
-  policy      = "${data.aws_iam_policy_document.login.json}"
-}
-
-resource "aws_iam_policy" "read" {
-  name        = "${module.label.id}${var.delimiter}read"
-  description = "Allow IAM Users to pull from ECR"
-  policy      = "${data.aws_iam_policy_document.read.json}"
-}
-
-resource "aws_iam_policy" "write" {
-  name        = "${module.label.id}${var.delimiter}write"
-  description = "Allow IAM Users to push into ECR"
-  policy      = "${data.aws_iam_policy_document.write.json}"
-}
-
-resource "aws_iam_role" "default" {
-  count              = "${signum(length(var.roles)) == 1 ? 0 : 1}"
-  name               = "${module.label.id}"
-  assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
-}
-
-resource "aws_iam_role_policy_attachment" "default_ecr" {
-  count      = "${signum(length(var.roles)) == 1 ? 0 : 1}"
-  role       = "${aws_iam_role.default.name}"
-  policy_arn = "${aws_iam_policy.login.arn}"
-}
-
-resource "aws_iam_role_policy_attachment" "default" {
-  count      = "${signum(length(var.roles)) == 1 ? length(var.roles) : 0}"
-  role       = "${element(var.roles, count.index)}"
-  policy_arn = "${aws_iam_policy.login.arn}"
-}
-
-resource "aws_iam_instance_profile" "default" {
-  count = "${signum(length(var.roles)) == 1 ? 0 : 1}"
-  name  = "${module.label.id}"
-  role  = "${aws_iam_role.default.name}"
 }
 
 resource "aws_ecr_lifecycle_policy" "default" {
@@ -211,4 +57,137 @@ resource "aws_ecr_lifecycle_policy" "default" {
   }]
 }
 EOF
+}
+
+## If roles are empty
+## Create default role to provide full access.
+## The role can be attached or assumed
+
+data "aws_iam_policy_document" "assume_role" {
+  count = "${local.roles_empty}"
+  statement {
+    sid     = "EC2AssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals = {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "default" {
+  count              = "${local.roles_empty}"
+  name               = "${module.label.id}"
+  assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
+}
+
+resource "aws_iam_instance_profile" "default" {
+  count = "${local.roles_empty}"
+  name  = "${module.label.id}"
+  role  = "${aws_iam_role.default.name}"
+}
+
+## Grant access to default role
+data "aws_iam_policy_document" "default_ecr" {
+  count = "${local.roles_empty}"
+
+  statement {
+    sid    = "ecr"
+    effect = "Allow"
+
+    principals = {
+      type = "AWS"
+
+      identifiers = [
+        "${aws_iam_role.default.arn}",
+      ]
+    }
+
+    actions = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:DescribeImages",
+    ]
+  }
+}
+
+resource "aws_ecr_repository_policy" "default_ecr" {
+  count      = "${local.roles_empty}"
+  repository = "${aws_ecr_repository.default.name}"
+  policy     = "${data.aws_iam_policy_document.default_ecr.json}"
+}
+
+
+## If any roles provided
+## Grant access to them
+
+data "aws_iam_policy_document" "resource" {
+  count = "${local.roles_non_empty}"
+
+  statement {
+    sid    = "readonly"
+    effect = "Allow"
+
+    principals = {
+      type = "AWS"
+
+      identifiers = [
+        "${data.aws_iam_role.read.*.arn}",
+      ]
+    }
+
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetRepositoryPolicy",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:DescribeImages",
+      "ecr:BatchGetImage",
+    ]
+  },
+
+  statement {
+    sid    = "full"
+    effect = "Allow"
+
+    principals = {
+      type = "AWS"
+
+      identifiers = [
+        "${data.aws_iam_role.full.*.arn}",
+      ]
+    }
+
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:PutImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetRepositoryPolicy",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:DescribeImages",
+      "ecr:BatchGetImage",
+    ]
+  }
+}
+
+resource "aws_ecr_repository_policy" "default" {
+  count      = "${local.roles_non_empty}"
+  repository = "${aws_ecr_repository.default.name}"
+  policy     = "${data.aws_iam_policy_document.resource.json}"
 }

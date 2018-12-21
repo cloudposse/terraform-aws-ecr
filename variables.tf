@@ -18,7 +18,13 @@ variable "use_fullname" {
 
 variable "roles" {
   type        = "list"
-  description = "Principal IAM roles to provide with access to the ECR"
+  description = "Principal IAM roles to provide with full access to the ECR"
+  default     = []
+}
+
+variable "roles_readonly" {
+  type        = "list"
+  description = "Principal IAM roles to provide with readonly access to the ECR"
   default     = []
 }
 

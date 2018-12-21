@@ -197,7 +197,7 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${local.roles_non_empty}"
+  count      = "${local.roles_full_non_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

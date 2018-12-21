@@ -8,7 +8,7 @@ locals {
   roles_full_empty     = "${signum(length(var.roles)) == 0 ? 1 : 0}"
 
   roles_count     = "${length(var.roles_readonly) + length(var.roles)}"
-  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles))}"
+  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles)) == 0 ? 0 : 1}"
   roles_empty     = "${signum(length(var.roles_readonly) + length(var.roles)) == 0 ? 1 : 0}"
 }
 

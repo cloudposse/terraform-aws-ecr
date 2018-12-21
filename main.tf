@@ -1,15 +1,15 @@
 locals {
   roles_read_count     = "${length(var.roles_readonly)}"
-  roles_read_non_empty = "${signum(length(var.roles_readonly)) == 1}"
-  roles_read_empty     = "${signum(length(var.roles_readonly)) == 0}"
+  roles_read_non_empty = "${signum(length(var.roles_readonly))}"
+  roles_read_empty     = "${signum(length(var.roles_readonly)) == 0 ? 1 : 0}"
 
   roles_full_count     = "${length(var.roles)}"
-  roles_full_non_empty = "${signum(length(var.roles)) == 1}"
-  roles_full_empty     = "${signum(length(var.roles)) == 0}"
+  roles_full_non_empty = "${signum(length(var.roles))}"
+  roles_full_empty     = "${signum(length(var.roles)) == 0 ? 1 : 0}"
 
   roles_count     = "${length(var.roles_readonly) + length(var.roles)}"
-  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles)) == 1}"
-  roles_empty     = "${signum(length(var.roles_readonly) + length(var.roles)) == 0}"
+  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles))}"
+  roles_empty     = "${signum(length(var.roles_readonly) + length(var.roles)) == 0 ? 1 : 0}"
 }
 
 data "aws_iam_role" "read" {

@@ -123,8 +123,6 @@ data "aws_iam_policy_document" "empty" {}
 
 
 data "aws_iam_policy_document" "resource_readonly" {
-  count = "${local.principal_read_non_empty}"
-
   statement {
     sid    = "readonly"
     effect = "Allow"
@@ -150,16 +148,7 @@ data "aws_iam_policy_document" "resource_readonly" {
   }
 }
 
-resource "aws_ecr_repository_policy" "default_readonly" {
-  count      = "${local.principal_read_non_empty}"
-  repository = "${aws_ecr_repository.default.name}"
-  policy     = "${data.aws_iam_policy_document.resource_readonly.json}"
-}
-
-
 data "aws_iam_policy_document" "resource_full" {
-  count = "${local.principal_full_non_empty}"
-
   statement {
     sid    = "full"
     effect = "Allow"

@@ -13,7 +13,7 @@ locals {
 }
 
 data "aws_iam_role" "read" {
-  count = "${local.roles_non_empty ? local.roles_read_count: 0}"
+  count = "${local.roles_read_non_empty ? local.roles_read_count: 0}"
   name  = "${element(var.roles_readonly, count.index)}"
 }
 

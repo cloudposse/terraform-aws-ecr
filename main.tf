@@ -121,7 +121,6 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 
 data "aws_iam_policy_document" "empty" {}
 
-
 data "aws_iam_policy_document" "resource_readonly" {
   statement {
     sid    = "readonly"
@@ -131,7 +130,7 @@ data "aws_iam_policy_document" "resource_readonly" {
       type = "AWS"
 
       identifiers = [
-        "${var.principal_readonly}"
+        "${var.principal_readonly}",
       ]
     }
 
@@ -157,7 +156,7 @@ data "aws_iam_policy_document" "resource_full" {
       type = "AWS"
 
       identifiers = [
-        "${var.principal}"
+        "${var.principal}",
       ]
     }
 
@@ -181,7 +180,7 @@ data "aws_iam_policy_document" "resource_full" {
 data "aws_iam_policy_document" "resource" {
   count = "${local.principal_non_empty}"
 
-  source_json = "${local.principal_read_non_empty ? data.aws_iam_policy_document.resource_readonly.json : data.aws_iam_policy_document.empty.json}"
+  source_json   = "${local.principal_read_non_empty ? data.aws_iam_policy_document.resource_readonly.json : data.aws_iam_policy_document.empty.json}"
   override_json = "${local.principal_full_non_empty ? data.aws_iam_policy_document.resource_full.json : data.aws_iam_policy_document.empty.json}"
 }
 

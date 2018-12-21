@@ -8,7 +8,7 @@ locals {
   roles_full_empty     = "${signum(length(var.roles)) == 0 ? 1 : 0}"
 
   roles_count     = "${length(var.roles_readonly) + length(var.roles)}"
-  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles)) == 0 ? 0 : 1}"
+  roles_non_empty = "${signum(length(var.roles_readonly) + length(var.roles))}"
   roles_empty     = "${signum(length(var.roles_readonly) + length(var.roles)) == 0 ? 1 : 0}"
 }
 
@@ -129,8 +129,8 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 ## If any roles provided
 ## Grant access to them
 
-data "aws_iam_policy_document" "resource" {
-  count = "${local.roles_non_empty}"
+data "aws_iam_policy_document" "resource_readonly" {
+  count = "${local.roles_read_non_empty}"
 
   statement {
     sid    = "readonly"
@@ -155,6 +155,17 @@ data "aws_iam_policy_document" "resource" {
       "ecr:BatchGetImage",
     ]
   }
+}
+
+resource "aws_ecr_repository_policy" "default_readonly" {
+  count      = "${local.roles_read_non_empty}"
+  repository = "${aws_ecr_repository.default.name}"
+  policy     = "${data.aws_iam_policy_document.resource_readonly.json}"
+}
+
+
+data "aws_iam_policy_document" "resource" {
+  count = "${local.roles_full_count}"
 
   statement {
     sid    = "full"

@@ -119,8 +119,8 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 ## If any roles provided
 ## Grant access to them
 
-data "aws_iam_policy_document" "resource_readonly" {
-  count = "${local.principal_read_non_empty}"
+data "aws_iam_policy_document" "resource" {
+  count = "${local.principal_non_empty}"
 
   statement {
     sid    = "readonly"
@@ -130,7 +130,7 @@ data "aws_iam_policy_document" "resource_readonly" {
       type = "AWS"
 
       identifiers = [
-        "${var.principal_readonly}",
+        "${var.principal_readonly}"
       ]
     }
 
@@ -145,17 +145,6 @@ data "aws_iam_policy_document" "resource_readonly" {
       "ecr:BatchGetImage",
     ]
   }
-}
-
-resource "aws_ecr_repository_policy" "default_readonly" {
-  count      = "${local.principal_read_non_empty}"
-  repository = "${aws_ecr_repository.default.name}"
-  policy     = "${data.aws_iam_policy_document.resource_readonly.json}"
-}
-
-
-data "aws_iam_policy_document" "resource" {
-  count = "${local.principal_full_non_empty}"
 
   statement {
     sid    = "full"
@@ -165,7 +154,7 @@ data "aws_iam_policy_document" "resource" {
       type = "AWS"
 
       identifiers = [
-        "${var.principal}",
+        "${var.principal}"
       ]
     }
 
@@ -187,7 +176,7 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${local.principal_full_non_empty}"
+  count      = "${local.principal_non_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

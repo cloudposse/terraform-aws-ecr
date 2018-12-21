@@ -119,8 +119,11 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 ## If any roles provided
 ## Grant access to them
 
-data "aws_iam_policy_document" "resource" {
-  count = "${local.principal_non_empty}"
+data "aws_iam_policy_document" "empty" {}
+
+
+data "aws_iam_policy_document" "resource_readonly" {
+  count = "${local.principal_read_non_empty}"
 
   statement {
     sid    = "readonly"
@@ -145,6 +148,17 @@ data "aws_iam_policy_document" "resource" {
       "ecr:BatchGetImage",
     ]
   }
+}
+
+resource "aws_ecr_repository_policy" "default_readonly" {
+  count      = "${local.principal_read_non_empty}"
+  repository = "${aws_ecr_repository.default.name}"
+  policy     = "${data.aws_iam_policy_document.resource_readonly.json}"
+}
+
+
+data "aws_iam_policy_document" "resource_full" {
+  count = "${local.principal_full_non_empty}"
 
   statement {
     sid    = "full"
@@ -173,6 +187,13 @@ data "aws_iam_policy_document" "resource" {
       "ecr:BatchGetImage",
     ]
   }
+}
+
+data "aws_iam_policy_document" "resource" {
+  count = "${local.principal_non_empty}"
+
+  source_json = "${local.principal_read_empty ? data.aws_iam_policy_document.resource_readonly.json : data.aws_iam_policy_document.empty.json}"
+  override_json_json = "${local.principal_full_empty ? data.aws_iam_policy_document.resource_full.json : data.aws_iam_policy_document.empty.json}"
 }
 
 resource "aws_ecr_repository_policy" "default" {

@@ -1,19 +1,19 @@
 locals {
-  principal_read_count     = "${length(var.principal_readonly)}"
-  principal_read_non_empty = "${signum(length(var.principal_readonly))}"
-  principal_read_empty     = "${signum(length(var.principal_readonly)) == 0 ? 1 : 0}"
+  principals_readonly_access_count     = "${length(var.principals_readonly_access)}"
+  principal_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
+  principals_readonly_access_empty     = "${signum(length(var.principals_readonly_access)) == 0 ? 1 : 0}"
 
-  principal_full_count     = "${length(var.principal)}"
-  principal_full_non_empty = "${signum(length(var.principal))}"
-  principal_full_empty     = "${signum(length(var.principal)) == 0 ? 1 : 0}"
+  principals_full_access_count     = "${length(var.principals_full_access)}"
+  principals_full_access_non_empty = "${signum(length(var.principals_full_access))}"
+  principals_full_access_empty     = "${signum(length(var.principals_full_access)) == 0 ? 1 : 0}"
 
-  principal_count     = "${length(var.principal_readonly) + length(var.principal)}"
-  principal_non_empty = "${signum(length(var.principal_readonly) + length(var.principal))}"
-  principal_empty     = "${signum(length(var.principal_readonly) + length(var.principal)) == 0 ? 1 : 0}"
+  principals_total_count     = "${length(var.principals_readonly_access) + length(var.principals_full_access)}"
+  principals_total_non_empty = "${signum(length(var.principals_readonly_access) + length(var.principals_full_access))}"
+  principals_total_empty     = "${signum(length(var.principals_readonly_access) + length(var.principals_full_access)) == 0 ? 1 : 0}"
 }
 
 module "label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.3.1"
+  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.3.3"
   namespace  = "${var.namespace}"
   stage      = "${var.stage}"
   name       = "${var.name}"
@@ -53,7 +53,7 @@ EOF
 ## The role can be attached or assumed
 
 data "aws_iam_policy_document" "assume_role" {
-  count = "${local.principal_empty}"
+  count = "${local.principals_total_empty}"
 
   statement {
     sid     = "EC2AssumeRole"
@@ -68,20 +68,20 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "default" {
-  count              = "${local.principal_empty}"
+  count              = "${local.principals_total_empty}"
   name               = "${module.label.id}"
   assume_role_policy = "${data.aws_iam_policy_document.assume_role.json}"
 }
 
 resource "aws_iam_instance_profile" "default" {
-  count = "${local.principal_empty}"
+  count = "${local.principals_total_empty}"
   name  = "${module.label.id}"
   role  = "${aws_iam_role.default.name}"
 }
 
 ## Grant access to default role
 data "aws_iam_policy_document" "default_ecr" {
-  count = "${local.principal_empty}"
+  count = "${local.principals_total_empty}"
 
   statement {
     sid    = "ecr"
@@ -111,7 +111,7 @@ data "aws_iam_policy_document" "default_ecr" {
 }
 
 resource "aws_ecr_repository_policy" "default_ecr" {
-  count      = "${local.principal_empty}"
+  count      = "${local.principals_total_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.default_ecr.json}"
 }
@@ -121,16 +121,16 @@ resource "aws_ecr_repository_policy" "default_ecr" {
 
 data "aws_iam_policy_document" "empty" {}
 
-data "aws_iam_policy_document" "resource_readonly" {
+data "aws_iam_policy_document" "resource_readonly_access" {
   statement {
-    sid    = "readonly"
+    sid    = "readonly_access"
     effect = "Allow"
 
     principals = {
       type = "AWS"
 
       identifiers = [
-        "${var.principal_readonly}",
+        "${var.principal_readonly_access}",
       ]
     }
 
@@ -147,16 +147,16 @@ data "aws_iam_policy_document" "resource_readonly" {
   }
 }
 
-data "aws_iam_policy_document" "resource_full" {
+data "aws_iam_policy_document" "resource_full_access" {
   statement {
-    sid    = "full"
+    sid    = "full_access"
     effect = "Allow"
 
     principals = {
       type = "AWS"
 
       identifiers = [
-        "${var.principal}",
+        "${var.principals_full_access}",
       ]
     }
 
@@ -180,12 +180,12 @@ data "aws_iam_policy_document" "resource_full" {
 data "aws_iam_policy_document" "resource" {
   count = "${local.principal_non_empty}"
 
-  source_json   = "${local.principal_read_non_empty ? data.aws_iam_policy_document.resource_readonly.json : data.aws_iam_policy_document.empty.json}"
-  override_json = "${local.principal_full_non_empty ? data.aws_iam_policy_document.resource_full.json : data.aws_iam_policy_document.empty.json}"
+  source_json   = "${local.principals_read_access_non_empty ? data.aws_iam_policy_document.resource_readonly_access.json : data.aws_iam_policy_document.empty.json}"
+  override_json = "${local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access.json : data.aws_iam_policy_document.empty.json}"
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${local.principal_non_empty}"
+  count      = "${local.principals_total_non_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

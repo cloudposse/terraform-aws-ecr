@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "default_ecr" {
   count = "${local.principals_total_empty}"
 
   statement {
-    sid    = "ecr"
+    sid    = "ECR"
     effect = "Allow"
 
     principals = {

@@ -1,6 +1,6 @@
 locals {
   principals_readonly_access_count     = "${length(var.principals_readonly_access)}"
-  principal_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
+  principals_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
   principals_readonly_access_empty     = "${signum(length(var.principals_readonly_access)) == 0 ? 1 : 0}"
 
   principals_full_access_count     = "${length(var.principals_full_access)}"
@@ -130,7 +130,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       type = "AWS"
 
       identifiers = [
-        "${var.principal_readonly_access}",
+        "${var.principals_readonly_access}",
       ]
     }
 
@@ -178,9 +178,9 @@ data "aws_iam_policy_document" "resource_full_access" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  count = "${local.principal_non_empty}"
+  count = "${local.principals_total_non_empty}"
 
-  source_json   = "${local.principals_read_access_non_empty ? data.aws_iam_policy_document.resource_readonly_access.json : data.aws_iam_policy_document.empty.json}"
+  source_json   = "${local.principals_readonly_access_non_empty ? data.aws_iam_policy_document.resource_readonly_access.json : data.aws_iam_policy_document.empty.json}"
   override_json = "${local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access.json : data.aws_iam_policy_document.empty.json}"
 }
 

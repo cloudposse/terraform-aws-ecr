@@ -123,7 +123,7 @@ data "aws_iam_policy_document" "empty" {}
 
 data "aws_iam_policy_document" "resource_readonly_access" {
   statement {
-    sid    = "readonly_access"
+    sid    = "ReadonlyAccess"
     effect = "Allow"
 
     principals = {
@@ -149,7 +149,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
 
 data "aws_iam_policy_document" "resource_full_access" {
   statement {
-    sid    = "full_access"
+    sid    = "FullAccess"
     effect = "Allow"
 
     principals = {

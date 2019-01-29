@@ -4,9 +4,6 @@ locals {
 
   principals_full_access_count     = "${length(var.principals_full_access)}"
   principals_full_access_non_empty = "${signum(length(var.principals_full_access))}"
-
-  principals_total_count     = "${length(var.principals_readonly_access) + length(var.principals_full_access)}"
-  principals_total_non_empty = "${signum(length(var.principals_readonly_access) + length(var.principals_full_access))}"
 }
 
 module "label" {
@@ -110,7 +107,6 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${local.principals_total_non_empty}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

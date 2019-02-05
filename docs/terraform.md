@@ -1,4 +1,3 @@
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -8,7 +7,8 @@
 | max_image_count | How many Docker Image versions AWS ECR will store | string | `7` | no |
 | name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
 | namespace | Namespace (e.g. `cp` or `cloudposse`) | string | - | yes |
-| roles | Principal IAM roles to provide with access to the ECR | list | `<list>` | no |
+| principals_full_access | Principal ARN to provide with full access to the ECR | list | `<list>` | no |
+| principals_readonly_access | Principal ARN to provide with readonly access to the ECR | list | `<list>` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | - | yes |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map | `<map>` | no |
 | use_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | string | `true` | no |
@@ -17,15 +17,7 @@
 
 | Name | Description |
 |------|-------------|
-| policy_login_arn | The IAM Policy ARN to be given access to login in ECR |
-| policy_login_name | The IAM Policy name to be given access to login in ECR |
-| policy_read_arn | The IAM Policy ARN to be given access to pull images from ECR |
-| policy_read_name | The IAM Policy name to be given access to pull images from ECR |
-| policy_write_arn | The IAM Policy ARN to be given access to push images to ECR |
-| policy_write_name | The IAM Policy name to be given access to push images to ECR |
 | registry_id | Registry ID |
 | registry_url | Registry URL |
 | repository_name | Registry name |
-| role_arn | Assume Role ARN to get registry access |
-| role_name | Assume Role name to get registry access |
 

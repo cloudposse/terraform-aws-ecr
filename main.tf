@@ -1,9 +1,6 @@
 locals {
-  principals_readonly_access_count     = "${length(var.principals_readonly_access)}"
   principals_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
-
-  principals_full_access_count     = "${length(var.principals_full_access)}"
-  principals_full_access_non_empty = "${signum(length(var.principals_full_access))}"
+  principals_full_access_non_empty     = "${signum(length(var.principals_full_access))}"
 }
 
 module "label" {
@@ -17,10 +14,12 @@ module "label" {
 }
 
 resource "aws_ecr_repository" "default" {
-  name = "${var.use_fullname == "true" ? module.label.id : module.label.name}"
+  count = "${var.enabled == "true" ? 1 : 0}"
+  name  = "${var.use_fullname == "true" ? module.label.id : module.label.name}"
 }
 
 resource "aws_ecr_lifecycle_policy" "default" {
+  count      = "${var.enabled == "true" ? 1 : 0}"
   repository = "${aws_ecr_repository.default.name}"
 
   policy = <<EOF
@@ -103,10 +102,11 @@ data "aws_iam_policy_document" "resource_full_access" {
 data "aws_iam_policy_document" "resource" {
   source_json   = "${local.principals_readonly_access_non_empty ? data.aws_iam_policy_document.resource_readonly_access.json : data.aws_iam_policy_document.empty.json}"
   override_json = "${local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access.json : data.aws_iam_policy_document.empty.json}"
-  "statement" {}
+  "statement"   = {}
 }
 
 resource "aws_ecr_repository_policy" "default" {
+  count      = "${var.enabled == "true" ? 1 : 0}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

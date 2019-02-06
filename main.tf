@@ -42,7 +42,9 @@ resource "aws_ecr_lifecycle_policy" "default" {
 EOF
 }
 
-data "aws_iam_policy_document" "resource" {
+data "aws_iam_policy_document" "empty" {}
+
+data "aws_iam_policy_document" "resource_readonly_access" {
   statement {
     sid    = "ReadonlyAccess"
     effect = "Allow"
@@ -66,7 +68,9 @@ data "aws_iam_policy_document" "resource" {
       "ecr:BatchGetImage",
     ]
   }
+}
 
+data "aws_iam_policy_document" "resource_full_access" {
   statement {
     sid    = "FullAccess"
     effect = "Allow"
@@ -94,7 +98,12 @@ data "aws_iam_policy_document" "resource" {
       "ecr:BatchGetImage",
     ]
   }
-  
+}
+
+data "aws_iam_policy_document" "resource" {
+  source_json   = "${local.principals_readonly_access_non_empty ? data.aws_iam_policy_document.resource_readonly_access.json : data.aws_iam_policy_document.empty.json}"
+  override_json = "${local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access.json : data.aws_iam_policy_document.empty.json}"
+  statement   = []
 }
 
 resource "aws_ecr_repository_policy" "default" {

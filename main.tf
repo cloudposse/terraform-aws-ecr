@@ -1,7 +1,7 @@
 locals {
   principals_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
   principals_full_access_non_empty     = "${signum(length(var.principals_full_access))}"
-  ecr_need_policy                      = "${signum(length(var.principals_full_access)) + signum(length(var.principals_readonly_access)) + (var.enabled == "true" ? 1 : 0) > 0 ? 1 : 0}"
+  ecr_need_policy                      = "${length(var.principals_full_access) + length(var.principals_readonly_access) + (var.enabled == "true" ? 1 : 0) > 0 ? 1 : 0}"
 }
 
 module "label" {

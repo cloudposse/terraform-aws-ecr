@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       type = "AWS"
 
       identifiers = [
-        "${var.principals_readonly_access}",
+        "${var.principals_readonly_access}"
       ]
     }
 
@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "resource_full_access" {
       type = "AWS"
 
       identifiers = [
-        "${var.principals_full_access}",
+        "${var.principals_full_access}"
       ]
     }
 

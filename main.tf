@@ -1,7 +1,7 @@
 locals {
   principals_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
   principals_full_access_non_empty     = "${signum(length(var.principals_full_access))}"
-  ecr_need_policy                      = "${(length(var.principals_full_access) + length(var.principals_readonly_access) + (var.enabled == "true" ? 1 : 0)) > 0 ? 1 : 0}"
+  ecr_need_policy                      = "${length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? "true" : "false"}"
 }
 
 module "label" {
@@ -108,7 +108,7 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count      = "${local.ecr_need_policy}"
+  count      = "${(local.ecr_need_policy == "true" && var.enabled == "true") ? 1 : 0}"
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

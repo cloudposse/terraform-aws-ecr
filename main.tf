@@ -18,6 +18,7 @@ module "label" {
 resource "aws_ecr_repository" "default" {
   count = "${var.enabled == "true" ? 1 : 0}"
   name  = "${var.use_fullname == "true" ? module.label.id : module.label.name}"
+  tags  = "${module.label.tags}"
 }
 
 resource "aws_ecr_lifecycle_policy" "default" {

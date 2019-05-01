@@ -119,7 +119,7 @@ Available targets:
 | attributes | Additional attributes (e.g. `policy` or `role`) | list | `<list>` | no |
 | delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
 | enabled | Set to false to prevent the module from creating any resources | string | `true` | no |
-| max_image_count | How many Docker Image versions AWS ECR will store | string | `7` | no |
+| max_image_count | How many Docker Image versions AWS ECR will store | string | `999` | no |
 | name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
 | namespace | Namespace (e.g. `cp` or `cloudposse`) | string | - | yes |
 | principals_full_access | Principal ARN to provide with full access to the ECR | list | `<list>` | no |

@@ -45,7 +45,7 @@ resource "aws_ecr_lifecycle_policy" "default" {
       "description": "Rotate images when reach ${var.max_image_count} images stored",
       "selection": {
         "tagStatus": "tagged",
-        "tagPrefixList": [],
+        "tagPrefixList": [""],
         "countType": "imageCountMoreThan",
         "countNumber": ${var.max_image_count}
       },

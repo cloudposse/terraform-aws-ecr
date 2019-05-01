@@ -42,6 +42,11 @@ We literally have [*hundreds of terraform modules*][terraform_modules] that are 
 
 ## Usage
 
+
+**IMPORTANT:** The `master` branch is used in `source` just as an example. In your code, do not pin to `master` because there may be breaking changes between releases.
+Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-ecr/releases).
+
+
 The module works in two distinct modes:
 
 1. If you provide the existing IAM Role names in the `roles` attribute, the Roles will be granted permissions to work with the created registry.
@@ -119,7 +124,7 @@ Available targets:
 | attributes | Additional attributes (e.g. `policy` or `role`) | list | `<list>` | no |
 | delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
 | enabled | Set to false to prevent the module from creating any resources | string | `true` | no |
-| max_image_count | How many Docker Image versions AWS ECR will store | string | `7` | no |
+| max_image_count | How many Docker Image versions AWS ECR will store | string | `500` | no |
 | name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
 | namespace | Namespace (e.g. `cp` or `cloudposse`) | string | - | yes |
 | principals_full_access | Principal ARN to provide with full access to the ECR | list | `<list>` | no |

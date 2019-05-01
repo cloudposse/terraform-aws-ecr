@@ -54,5 +54,5 @@ variable "tags" {
 variable "max_image_count" {
   type        = "string"
   description = "How many Docker Image versions AWS ECR will store"
-  default     = "1000"
+  default     = "999"
 }

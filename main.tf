@@ -30,18 +30,6 @@ resource "aws_ecr_lifecycle_policy" "default" {
   "rules": [
     {
       "rulePriority": 1,
-      "description": "Remove untagged images",
-      "selection": {
-        "tagStatus": "untagged",
-        "countType": "imageCountMoreThan",
-        "countNumber": 1
-      },
-      "action": {
-        "type": "expire"
-      }
-    },
-    {
-      "rulePriority": 2,
       "description": "Rotate images when reach ${var.max_image_count} images stored",
       "selection": {
         "tagStatus": "any",

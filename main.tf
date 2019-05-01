@@ -27,19 +27,33 @@ resource "aws_ecr_lifecycle_policy" "default" {
 
   policy = <<EOF
 {
-  "rules": [{
-    "rulePriority": 1,
-    "description": "Rotate images when reach ${var.max_image_count} images stored",
-    "selection": {
-      "tagStatus": "tagged",
-      "tagPrefixList": ["${var.stage}"],
-      "countType": "imageCountMoreThan",
-      "countNumber": ${var.max_image_count}
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Remove untagged images",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "imageCountMoreThan",
+        "countNumber": 0
+      },
+      "action": {
+        "type": "expire"
+      }
     },
-    "action": {
-      "type": "expire"
+    {
+      "rulePriority": 2,
+      "description": "Rotate images when reach ${var.max_image_count} images stored",
+      "selection": {
+        "tagStatus": "tagged",
+        "tagPrefixList": [],
+        "countType": "imageCountMoreThan",
+        "countNumber": ${var.max_image_count}
+      },
+      "action": {
+        "type": "expire"
+      }
     }
-  }]
+  ]
 }
 EOF
 }

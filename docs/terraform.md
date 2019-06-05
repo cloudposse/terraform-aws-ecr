@@ -18,6 +18,7 @@
 
 | Name | Description |
 |------|-------------|
+| registry_arn | Registry ARN |
 | registry_id | Registry ID |
 | registry_url | Registry URL |
 | repository_name | Registry name |

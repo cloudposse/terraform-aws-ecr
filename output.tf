@@ -12,3 +12,8 @@ output "repository_name" {
   value       = "${join("", aws_ecr_repository.default.*.name)}"
   description = "Registry name"
 }
+
+output "registry_arn" {
+  value       = "${join("", aws_ecr_repository.default.*.arn)}"
+  description = "ARN"
+}

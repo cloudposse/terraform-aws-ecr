@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
 // Test the Terraform module in examples/complete using Terratest.
@@ -25,9 +26,9 @@ func TestExamplesComplete(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	// Run `terraform output` to get the value of an output variable
-	//s3BucketName := terraform.Output(t, terraformOptions, "s3_bucket")
-	//
-	//expectedS3BucketName := "eg-test-cloudfront-s3-cdn-origin"
-	//// Verify we're getting back the outputs we expect
-	//assert.Equal(t, expectedS3BucketName, s3BucketName)
+	repositoryName := terraform.Output(t, terraformOptions, "repository_name")
+
+	expectedRepositoryName := "eg-test-ecr-test"
+	// Verify we're getting back the outputs we expect
+	assert.Equal(t, expectedRepositoryName, repositoryName)
 }

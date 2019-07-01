@@ -1,15 +1,15 @@
 variable "region" {
-  type = string
+  type = "string"
 }
 
 variable "namespace" {
-  type = string
+  type = "string"
 }
 
 variable "name" {
-  type = string
+  type = "string"
 }
 
 variable "stage" {
-  type = string
+  type = "string"
 }

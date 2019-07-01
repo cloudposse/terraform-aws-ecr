@@ -3,7 +3,7 @@
 
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
-# terraform-aws-ecr [![Build Status](https://travis-ci.org/cloudposse/terraform-aws-ecr.svg?branch=master)](https://travis-ci.org/cloudposse/terraform-aws-ecr) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-ecr.svg)](https://github.com/cloudposse/terraform-aws-ecr/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# terraform-aws-ecr [![Codefresh Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-ecr?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d182cb1ac440444a6c0082b) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-ecr.svg)](https://github.com/cloudposse/terraform-aws-ecr/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 
 Terraform module to provision an [`AWS ECR Docker Container registry`](https://aws.amazon.com/ecr/).
@@ -59,46 +59,17 @@ In addition, an `EC2 Instance Profile` will be created from the new IAM Role, wh
 Include this repository as a module in your existing terraform code:
 
 ```hcl
-# IAM Role is provided. It will be granted ECR permissions
+# IAM Role to be granted ECR permissions
 data "aws_iam_role" "ecr" {
   name = "ecr"
 }
 
 module "ecr" {
-  source              = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
-  name                = "${var.name}"
-  namespace           = "${var.namespace}"
-  stage               = "${var.stage}"
-  roles               = ["${data.aws_iam_role.ecr.name}"]
-}
-```
-
-Example of attaching policies to a user for CI/CD
-
-```hcl
-module "cicd_user" {
-  source    = "git::https://github.com/cloudposse/terraform-aws-iam-system-user.git?ref=tags/0.3.0"
-  namespace = "${var.namespace}"
-  stage     = "${var.stage}"
-  name      = "codefresh"
-}
-
-resource "aws_iam_policy_attachment" "login" {
-  name       = "${module.cicd_user.user_name}-login"
-  users      = ["${module.cicd_user.user_name}"]
-  policy_arn = "${module.ecr.policy_login_arn}"
-}
-
-resource "aws_iam_policy_attachment" "read" {
-  name       = "${module.cicd_user.user_name}-read"
-  users      = ["${module.cicd_user.user_name}"]
-  policy_arn = "${module.ecr.policy_read_arn}"
-}
-
-resource "aws_iam_policy_attachment" "write" {
-  name       = "${module.cicd_user.user_name}-write"
-  users      = ["${module.cicd_user.user_name}"]
-  policy_arn = "${module.ecr.policy_write_arn}"
+  source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+  namespace              = "eg"
+  stage                  = "test"
+  name                   = "ecr"
+  principals_full_access = [data.aws_iam_role.ecr.arn]
 }
 ```
 
@@ -121,17 +92,17 @@ Available targets:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| attributes | Additional attributes (e.g. `policy` or `role`) | list | `<list>` | no |
+| attributes | Additional attributes (e.g. `policy` or `role`) | list(string) | `<list>` | no |
 | delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
-| enabled | Set to false to prevent the module from creating any resources | string | `true` | no |
+| enabled | Set to false to prevent the module from creating any resources | bool | `true` | no |
 | max_image_count | How many Docker Image versions AWS ECR will store | string | `500` | no |
 | name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
-| namespace | Namespace (e.g. `cp` or `cloudposse`) | string | - | yes |
-| principals_full_access | Principal ARN to provide with full access to the ECR | list | `<list>` | no |
-| principals_readonly_access | Principal ARN to provide with readonly access to the ECR | list | `<list>` | no |
-| stage | Stage (e.g. `prod`, `dev`, `staging`) | string | - | yes |
-| tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map | `<map>` | no |
-| use_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | string | `true` | no |
+| namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
+| principals_full_access | Principal ARNs to provide with full access to the ECR | list(string) | `<list>` | no |
+| principals_readonly_access | Principal ARNs to provide with readonly access to the ECR | list(string) | `<list>` | no |
+| stage | Stage (e.g. `prod`, `dev`, `staging`) | string | `` | no |
+| tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map(string) | `<map>` | no |
+| use_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | bool | `true` | no |
 
 ## Outputs
 
@@ -277,8 +248,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 ### Contributors
 
-|  [![Igor Rodionov][goruha_avatar]][goruha_homepage]<br/>[Igor Rodionov][goruha_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Sergey Vasilyev][s2504s_avatar]][s2504s_homepage]<br/>[Sergey Vasilyev][s2504s_homepage] | [![Ivan Pinatti][ivan-pinatti_avatar]][ivan-pinatti_homepage]<br/>[Ivan Pinatti][ivan-pinatti_homepage] |
-|---|---|---|---|
+|  [![Igor Rodionov][goruha_avatar]][goruha_homepage]<br/>[Igor Rodionov][goruha_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Sergey Vasilyev][s2504s_avatar]][s2504s_homepage]<br/>[Sergey Vasilyev][s2504s_homepage] | [![Ivan Pinatti][ivan-pinatti_avatar]][ivan-pinatti_homepage]<br/>[Ivan Pinatti][ivan-pinatti_homepage] | [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] |
+|---|---|---|---|---|
 
   [goruha_homepage]: https://github.com/goruha
   [goruha_avatar]: https://github.com/goruha.png?size=150
@@ -288,6 +259,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [s2504s_avatar]: https://github.com/s2504s.png?size=150
   [ivan-pinatti_homepage]: https://github.com/ivan-pinatti
   [ivan-pinatti_avatar]: https://github.com/ivan-pinatti.png?size=150
+  [osterman_homepage]: https://github.com/osterman
+  [osterman_avatar]: https://github.com/osterman.png?size=150
 
 
 

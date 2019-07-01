@@ -32,9 +32,9 @@ github_repo: cloudposse/terraform-aws-ecr
 
 # Badges to display
 badges:
-  - name: "Build Status"
-    image: "https://travis-ci.org/cloudposse/terraform-aws-ecr.svg?branch=master"
-    url: "https://travis-ci.org/cloudposse/terraform-aws-ecr"
+  - name: "Codefresh Build Status"
+    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-ecr?type=cf-1"
+    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d182cb1ac440444a6c0082b"
   - name: "Latest Release"
     image: "https://img.shields.io/github/release/cloudposse/terraform-aws-ecr.svg"
     url: "https://github.com/cloudposse/terraform-aws-ecr/releases/latest"
@@ -68,46 +68,17 @@ usage: |-
   Include this repository as a module in your existing terraform code:
 
   ```hcl
-  # IAM Role is provided. It will be granted ECR permissions
+  # IAM Role to be granted ECR permissions
   data "aws_iam_role" "ecr" {
     name = "ecr"
   }
 
   module "ecr" {
-    source              = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
-    name                = "${var.name}"
-    namespace           = "${var.namespace}"
-    stage               = "${var.stage}"
-    roles               = ["${data.aws_iam_role.ecr.name}"]
-  }
-  ```
-
-  Example of attaching policies to a user for CI/CD
-
-  ```hcl
-  module "cicd_user" {
-    source    = "git::https://github.com/cloudposse/terraform-aws-iam-system-user.git?ref=tags/0.3.0"
-    namespace = "${var.namespace}"
-    stage     = "${var.stage}"
-    name      = "codefresh"
-  }
-
-  resource "aws_iam_policy_attachment" "login" {
-    name       = "${module.cicd_user.user_name}-login"
-    users      = ["${module.cicd_user.user_name}"]
-    policy_arn = "${module.ecr.policy_login_arn}"
-  }
-
-  resource "aws_iam_policy_attachment" "read" {
-    name       = "${module.cicd_user.user_name}-read"
-    users      = ["${module.cicd_user.user_name}"]
-    policy_arn = "${module.ecr.policy_read_arn}"
-  }
-
-  resource "aws_iam_policy_attachment" "write" {
-    name       = "${module.cicd_user.user_name}-write"
-    users      = ["${module.cicd_user.user_name}"]
-    policy_arn = "${module.ecr.policy_write_arn}"
+    source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+    namespace              = "eg"
+    stage                  = "test"
+    name                   = "ecr"
+    principals_full_access = [data.aws_iam_role.ecr.arn]
   }
   ```
 
@@ -125,3 +96,5 @@ contributors:
     github: "s2504s"
   - name: "Ivan Pinatti"
     github: "ivan-pinatti"
+  - name: "Erik Osterman"
+    github: "osterman"

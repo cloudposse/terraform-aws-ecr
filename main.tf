@@ -1,9 +1,10 @@
 locals {
   principals_readonly_access_non_empty = "${signum(length(var.principals_readonly_access))}"
   principals_full_access_non_empty     = "${signum(length(var.principals_full_access))}"
+
   ## ecr_need_policy was intended to prevent creating a policy if we did not have any principals to attach it to,
   ## but it does not work because Terraform does not pass the lengths of lists across modules.
-  # ecr_need_policy                      = "${length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? "true" : "false"}"
+  # ecr_need_policy = "${length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? "true" : "false"}"
 }
 
 module "label" {
@@ -126,7 +127,8 @@ data "aws_iam_policy_document" "resource" {
 resource "aws_ecr_repository_policy" "default" {
   ## Unfortunately, ecr_need_policy does not work due to Terraform limitations, so we just leave it out
   # count      = "${(local.ecr_need_policy == "true" && var.enabled == "true") ? 1 : 0}"
-  count      = "${var.enabled == "true" ? 1 : 0}"
+  count = "${var.enabled == "true" ? 1 : 0}"
+
   repository = "${aws_ecr_repository.default.name}"
   policy     = "${data.aws_iam_policy_document.resource.json}"
 }

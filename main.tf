@@ -18,7 +18,12 @@ module "label" {
 resource "aws_ecr_repository" "default" {
   count = var.enabled ? 1 : 0
   name  = var.use_fullname ? module.label.id : module.label.name
-  tags  = module.label.tags
+
+  image_scanning_configuration {
+    scan_on_push = var.scan_images_on_push
+  }
+
+  tags = module.label.tags
 }
 
 resource "aws_ecr_lifecycle_policy" "default" {

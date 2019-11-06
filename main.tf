@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
   count = var.enabled ? 1 : 0
 
   statement {
-    sid = "ReadonlyAccess"
+    sid    = "ReadonlyAccess"
     effect = "Allow"
 
     principals {
@@ -96,7 +96,7 @@ data "aws_iam_policy_document" "resource_full_access" {
   count = var.enabled ? 1 : 0
 
   statement {
-    sid = "FullAccess"
+    sid    = "FullAccess"
     effect = "Allow"
 
     principals {
@@ -123,13 +123,13 @@ data "aws_iam_policy_document" "resource_full_access" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  count = var.enabled ? 1 : 0
-  source_json = local.principals_readonly_access_non_empty ? join("", data.aws_iam_policy_document.resource_readonly_access.*.json) : join("", data.aws_iam_policy_document.empty.*.json)
+  count         = var.enabled ? 1 : 0
+  source_json   = local.principals_readonly_access_non_empty ? join("", data.aws_iam_policy_document.resource_readonly_access.*.json) : join("", data.aws_iam_policy_document.empty.*.json)
   override_json = local.principals_full_access_non_empty ? join("", data.aws_iam_policy_document.resource_full_access.*.json) : join("", data.aws_iam_policy_document.empty.*.json)
 }
 
 resource "aws_ecr_repository_policy" "default" {
-  count = local.ecr_need_policy && var.enabled ? 1 : 0
+  count      = local.ecr_need_policy && var.enabled ? 1 : 0
   repository = join("", aws_ecr_repository.default.*.name)
-  policy = join("", data.aws_iam_policy_document.resource.*.json)
+  policy     = join("", data.aws_iam_policy_document.resource.*.json)
 }

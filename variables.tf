@@ -67,3 +67,10 @@ variable "max_image_count" {
   description = "How many Docker Image versions AWS ECR will store"
   default     = 500
 }
+
+variable "regex_replace_chars" {
+  type        = string
+  default     = "/[^a-zA-Z0-9-]/"
+  description = "Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only hyphens, letters and digits are allowed, all other chars are removed"
+}
+

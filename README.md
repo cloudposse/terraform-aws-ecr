@@ -100,6 +100,7 @@ Available targets:
 | namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
 | principals_full_access | Principal ARNs to provide with full access to the ECR | list(string) | `<list>` | no |
 | principals_readonly_access | Principal ARNs to provide with readonly access to the ECR | list(string) | `<list>` | no |
+| scan_images_on_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | bool | `false` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | `` | no |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map(string) | `<map>` | no |
 | use_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | bool | `true` | no |

@@ -57,6 +57,12 @@ variable "principals_readonly_access" {
   default     = []
 }
 
+variable "scan_images_on_push" {
+  type        = bool
+  description = "Indicates whether images are scanned after being pushed to the repository (true) or not (false)"
+  default     = false
+}
+
 variable "max_image_count" {
   description = "How many Docker Image versions AWS ECR will store"
   default     = 500

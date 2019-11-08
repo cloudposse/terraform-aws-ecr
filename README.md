@@ -112,6 +112,7 @@ Available targets:
 |------|-------------|
 | registry_id | Registry ID |
 | registry_url | Registry URL |
+| repository_arn | Repository ARN |
 | repository_name | Registry name |
 
 

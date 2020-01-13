@@ -74,3 +74,8 @@ variable "regex_replace_chars" {
   description = "Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only hyphens, letters and digits are allowed, all other chars are removed"
 }
 
+variable "list_image" {
+  type        = list(string)
+  default     = []
+  description = "list of docker local image name, used as a repositry name for AWS-ECR "
+}

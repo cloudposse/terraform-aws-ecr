@@ -17,7 +17,7 @@ module "label" {
 }
 
 locals {
-  _name  = var.use_fullname ? module.label.id : module.label.name
+  _name      = var.use_fullname ? module.label.id : module.label.name
   list_image = length(var.list_image) > 0 ? var.list_image : [local._name]
 }
 
@@ -34,7 +34,7 @@ resource "aws_ecr_repository" "default" {
 
 resource "aws_ecr_lifecycle_policy" "default" {
   count      = var.enabled ? length(local.list_image) : 0
-  repository = join("", [aws_ecr_repository.default[count.index].name] )
+  repository = join("", [aws_ecr_repository.default[count.index].name])
 
   policy = <<EOF
 {

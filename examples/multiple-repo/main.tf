@@ -3,10 +3,10 @@ provider "aws" {
 }
 
 module "ecr" {
-  source    = "../../"
-  namespace = "eg"
-  stage     = "dev"
-  name      = "app"
+  source       = "../../"
+  namespace    = "eg"
+  stage        = "dev"
+  name         = "app"
   use_fullname = false
-  list_image = ["redis", "nginx"]
+  list_image   = ["redis", "nginx"]
 }

@@ -23,21 +23,21 @@ output "repository_id_map" {
     aws_ecr_repository.default[*].name
     , aws_ecr_repository.default[*].registry_id
   )
-  description = "Repository id map"
+  description = "Map of repository names to repository IDs"
 }
 
 output "repository_url_map" {
   value = zipmap(
-    aws_ecr_repository.default[*].name
-    , aws_ecr_repository.default[*].repository_url
+    aws_ecr_repository.default[*].name,
+    aws_ecr_repository.default[*].repository_url
   )
-  description = "Repository url map"
+  description = "Map of repository names to repository URLs"
 }
 
 output "repository_arn_map" {
   value = zipmap(
-    aws_ecr_repository.default[*].name
-    , aws_ecr_repository.default[*].arn
+    aws_ecr_repository.default[*].name,
+    aws_ecr_repository.default[*].arn
   )
-  description = "Repository arn map"
+  description = "Map of repository names to repository ARNs"
 }

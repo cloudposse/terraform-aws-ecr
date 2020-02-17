@@ -77,5 +77,5 @@ variable "regex_replace_chars" {
 variable "list_image" {
   type        = list(string)
   default     = []
-  description = "list of docker local image name, used as a repositry name for AWS-ECR "
+  description = "List of Docker local image names, used as repository names for AWS ECR "
 }

@@ -34,7 +34,7 @@ resource "aws_ecr_repository" "default" {
 
 resource "aws_ecr_lifecycle_policy" "default" {
   count      = var.enabled ? length(local.image_names) : 0
-  repository = join("", [aws_ecr_repository.default[count.index].name])
+  repository = aws_ecr_repository.default[count.index].name
 
   policy = <<EOF
 {

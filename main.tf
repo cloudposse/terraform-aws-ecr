@@ -17,7 +17,7 @@ module "label" {
 }
 
 locals {
-  _name      = var.use_fullname ? module.label.id : module.label.name
+  _name       = var.use_fullname ? module.label.id : module.label.name
   image_names = length(var.image_names) > 0 ? var.image_names : [local._name]
 }
 

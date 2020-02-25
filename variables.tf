@@ -79,3 +79,9 @@ variable "image_names" {
   default     = []
   description = "List of Docker local image names, used as repository names for AWS ECR "
 }
+
+variable "image_tag_mutability" {
+  type        = string
+  default     = "MUTABLE"
+  description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
+}

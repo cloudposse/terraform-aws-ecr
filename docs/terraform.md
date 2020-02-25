@@ -5,6 +5,7 @@
 | attributes | Additional attributes (e.g. `policy` or `role`) | list(string) | `<list>` | no |
 | delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
 | enabled | Set to false to prevent the module from creating any resources | bool | `true` | no |
+| image_names | List of Docker local image names, used as repository names for AWS ECR | list(string) | `<list>` | no |
 | max_image_count | How many Docker Image versions AWS ECR will store | string | `500` | no |
 | name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
 | namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
@@ -23,5 +24,8 @@
 | registry_id | Registry ID |
 | registry_url | Registry URL |
 | repository_arn | Repository ARN |
+| repository_arn_map | Map of repository names to repository ARNs |
+| repository_id_map | Map of repository names to repository IDs |
 | repository_name | Repository name |
+| repository_url_map | Map of repository names to repository URLs |
 

@@ -22,8 +22,9 @@ locals {
 }
 
 resource "aws_ecr_repository" "default" {
-  count = var.enabled ? length(local.image_names) : 0
-  name  = local.image_names[count.index]
+  count                = var.enabled ? length(local.image_names) : 0
+  name                 = local.image_names[count.index]
+  image_tag_mutability = var.image_tag_mutability
 
   image_scanning_configuration {
     scan_on_push = var.scan_images_on_push

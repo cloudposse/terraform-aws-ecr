@@ -135,6 +135,7 @@ Available targets:
 | delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
 | enabled | Set to false to prevent the module from creating any resources | bool | `true` | no |
 | image_names | List of Docker local image names, used as repository names for AWS ECR | list(string) | `<list>` | no |
+| image_tag_mutability | The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE` | string | `MUTABLE` | no |
 | max_image_count | How many Docker Image versions AWS ECR will store | string | `500` | no |
 | name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
 | namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |

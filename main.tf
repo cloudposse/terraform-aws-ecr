@@ -128,6 +128,10 @@ data "aws_iam_policy_document" "resource_full_access" {
       "ecr:BatchGetImage",
       "ecr:DescribeImageScanFindings",
       "ecr:StartImageScan",
+      "ecr:BatchDeleteImage",
+      "ecr:SetRepositoryPolicy",
+      "ecr:DeleteRepositoryPolicy",
+      "ecr:DeleteRepository",
     ]
   }
 }

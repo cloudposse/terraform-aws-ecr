@@ -30,7 +30,8 @@ resource "aws_ecr_repository" "default" {
     scan_on_push = var.scan_images_on_push
   }
 
-  tags = module.label.tags
+  #tags = module.label.tags
+  tags = "${module.label.id}${module.label.delimiter}${local.image_names[count.index]}"
 }
 
 resource "aws_ecr_lifecycle_policy" "default" {

@@ -23,7 +23,7 @@ locals {
 
 resource "aws_ecr_repository" "default" {
   count                = var.enabled ? length(local.image_names) : 0
-  name                 = local.image_names[count.index]
+  name                 = var.use_fullname && length(var.image_names) > 0 ? "${module.label.id}${module.label.delimiter}${local.image_names[count.index]}" : local.image_names[count.index]
   image_tag_mutability = var.image_tag_mutability
 
   image_scanning_configuration {

@@ -31,7 +31,7 @@ resource "aws_ecr_repository" "default" {
   }
 
   #tags = module.label.tags
-  tags = merge(module.label.tags, map("Name", "${module.label.id}${module.label.delimiter}${local.image_names[count.index]}"))
+  tags = "${module.label.id}${module.label.delimiter}${local.image_names[count.index]}"
 }
 
 resource "aws_ecr_lifecycle_policy" "default" {

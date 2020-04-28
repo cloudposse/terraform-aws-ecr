@@ -70,8 +70,8 @@ variable "max_image_count" {
 
 variable "regex_replace_chars" {
   type        = string
-  default     = "/[^a-zA-Z0-9-]/"
-  description = "Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only hyphens, letters and digits are allowed, all other chars are removed"
+  default     = "/[^a-z/A-Z_0-9-]/"
+  description = "Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only letters, digits, dash, slash, and underscore are allowed, all other chars are removed"
 }
 
 variable "image_names" {

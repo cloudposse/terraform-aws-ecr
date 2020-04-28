@@ -86,14 +86,24 @@ We literally have [*hundreds of terraform modules*][terraform_modules] that are 
 Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-ecr/releases).
 
 
-The module works in two distinct modes:
+The module creates one or more Elastic Container Registry (ECR) repositories. All repositories created
+will share the same configuration. Use this module multiple times to create repositories with
+different configurations.
 
-1. If you provide the existing IAM Role names in the `roles` attribute, the Roles will be granted permissions to work with the created registry.
+If you provide 1 or more names in `image_names` then one repository will be created for
+each of the names you provide. Those names can include "namespaces", which are just
+prefixes ending with a slash (`/`).
 
-2. If the `roles` attribute is omitted or is an empty list, a new IAM Role will be created and granted all the required permissions to work with the registry.
-The Role name will be assigned to the output variable `role_name`.
-In addition, an `EC2 Instance Profile` will be created from the new IAM Role, which might be assigned to EC2 instances granting them permissions to work with the ECR registry.
+If you do not provide any names in `image_names`, the module will create a single ECR repo
+named `namespace-stage-name` or just `name` depending on the value of `use_fullname`.
 
+Access to the repositories is granted to via the `principals_full_access` and
+`principals_readonly_access` lists, which are lists of strings that can designate [any valid AWS
+Principal](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#Principal_specifying).
+This module only creates the Repository Policy allowing those Principals access.
+The Principals will still separately need IAM policies allowing them permission
+to execute ECR actions against the repository. For more details, see
+[How Amazon Elastic Container Registry Works with IAM](https://docs.aws.amazon.com/AmazonECR/latest/userguide/security_iam_service-with-iam.html).
 
 Include this repository as a module in your existing terraform code:
 
@@ -141,7 +151,7 @@ Available targets:
 | namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
 | principals_full_access | Principal ARNs to provide with full access to the ECR | list(string) | `<list>` | no |
 | principals_readonly_access | Principal ARNs to provide with readonly access to the ECR | list(string) | `<list>` | no |
-| regex_replace_chars | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only hyphens, letters and digits are allowed, all other chars are removed | string | `/[^a-zA-Z0-9-]/` | no |
+| regex_replace_chars | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only letters, digits, dash, slash, and underscore are allowed, all other chars are removed | string | `/[^a-z/A-Z_0-9-]/` | no |
 | scan_images_on_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | bool | `false` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | `` | no |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map(string) | `<map>` | no |
@@ -152,11 +162,10 @@ Available targets:
 | Name | Description |
 |------|-------------|
 | registry_id | Registry ID |
-| registry_url | Registry URL |
-| repository_arn | Repository ARN |
+| repository_arn | ARN of first repository created |
 | repository_arn_map | Map of repository names to repository ARNs |
-| repository_id_map | Map of repository names to repository IDs |
-| repository_name | Repository name |
+| repository_name | Name of first repository created |
+| repository_url | URL of first repository created |
 | repository_url_map | Map of repository names to repository URLs |
 
 
@@ -211,6 +220,10 @@ We deliver 10x the value for a fraction of the cost of a full-time engineer. Our
 ## Slack Community
 
 Join our [Open Source Community][slack] on Slack. It's **FREE** for everyone! Our "SweetOps" community is where you get to talk with others who share a similar vision for how to rollout and manage infrastructure. This is the best place to talk shop, ask questions, solicit feedback, and work together as a community to build totally *sweet* infrastructure.
+
+## Discourse Forums
+
+Participate in our [Discourse Forums][discourse]. Here you'll find answers to commonly asked questions. Most questions will be related to the enormous number of projects we support on our GitHub. Come here to collaborate on answers, find solutions, and get ideas about the products and services we value. It only takes a minute to get started! Just sign in with SSO using your GitHub account.
 
 ## Newsletter
 
@@ -329,6 +342,7 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [testimonial]: https://cpco.io/leave-testimonial?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=testimonial
   [office_hours]: https://cloudposse.com/office-hours?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=office_hours
   [newsletter]: https://cpco.io/newsletter?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=newsletter
+  [discourse]: https://ask.sweetops.com/?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=discourse
   [email]: https://cpco.io/email?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=email
   [commercial_support]: https://cpco.io/commercial-support?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=commercial_support
   [we_love_open_source]: https://cpco.io/we-love-open-source?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=we_love_open_source

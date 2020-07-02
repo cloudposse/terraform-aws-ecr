@@ -85,3 +85,10 @@ variable "image_tag_mutability" {
   default     = "MUTABLE"
   description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
 }
+
+variable "enable_lifecycle_policy" {
+  type        = bool
+  description = "Set to false to prevent the module from adding any lifecycle policies to any repositories"
+  default     = true
+
+}

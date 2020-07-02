@@ -1,31 +1,46 @@
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | ~> 0.12.0 |
+| aws | ~> 2.34 |
+| local | ~> 1.2 |
+| template | ~> 2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | ~> 2.34 |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| attributes | Additional attributes (e.g. `policy` or `role`) | list(string) | `<list>` | no |
-| delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
-| enabled | Set to false to prevent the module from creating any resources | bool | `true` | no |
-| image_names | List of Docker local image names, used as repository names for AWS ECR | list(string) | `<list>` | no |
-| image_tag_mutability | The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE` | string | `MUTABLE` | no |
-| max_image_count | How many Docker Image versions AWS ECR will store | string | `500` | no |
-| name | The Name of the application or solution  (e.g. `bastion` or `portal`) | string | - | yes |
-| namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
-| principals_full_access | Principal ARNs to provide with full access to the ECR | list(string) | `<list>` | no |
-| principals_readonly_access | Principal ARNs to provide with readonly access to the ECR | list(string) | `<list>` | no |
-| regex_replace_chars | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only letters, digits, dash, slash, and underscore are allowed, all other chars are removed | string | `/[^a-z/A-Z_0-9-]/` | no |
-| scan_images_on_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | bool | `false` | no |
-| stage | Stage (e.g. `prod`, `dev`, `staging`) | string | `` | no |
-| tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | map(string) | `<map>` | no |
-| use_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | bool | `true` | no |
+|------|-------------|------|---------|:--------:|
+| attributes | Additional attributes (e.g. `policy` or `role`) | `list(string)` | `[]` | no |
+| delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | `string` | `"-"` | no |
+| enabled | Set to false to prevent the module from creating any resources | `bool` | `true` | no |
+| image\_names | List of Docker local image names, used as repository names for AWS ECR | `list(string)` | `[]` | no |
+| image\_tag\_mutability | The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE` | `string` | `"MUTABLE"` | no |
+| max\_image\_count | How many Docker Image versions AWS ECR will store | `number` | `500` | no |
+| name | The Name of the application or solution  (e.g. `bastion` or `portal`) | `string` | n/a | yes |
+| namespace | Namespace (e.g. `eg` or `cp`) | `string` | `""` | no |
+| principals\_full\_access | Principal ARNs to provide with full access to the ECR | `list(string)` | `[]` | no |
+| principals\_readonly\_access | Principal ARNs to provide with readonly access to the ECR | `list(string)` | `[]` | no |
+| regex\_replace\_chars | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only letters, digits, dash, slash, and underscore are allowed, all other chars are removed | `string` | `"/[^a-z/A-Z_0-9-]/"` | no |
+| scan\_images\_on\_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | `bool` | `false` | no |
+| stage | Stage (e.g. `prod`, `dev`, `staging`) | `string` | `""` | no |
+| tags | Additional tags (e.g. `map('BusinessUnit','XYZ')`) | `map(string)` | `{}` | no |
+| use\_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | `bool` | `true` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| registry_id | Registry ID |
-| repository_arn | ARN of first repository created |
-| repository_arn_map | Map of repository names to repository ARNs |
-| repository_name | Name of first repository created |
-| repository_url | URL of first repository created |
-| repository_url_map | Map of repository names to repository URLs |
+| registry\_arn | ARN of first registry created |
+| registry\_arn\_map | Map of registry names to registry ARNs |
+| registry\_id | Registry ID |
+| registry\_name | Name of first registry created |
+| registry\_url | URL of first registry created |
+| registry\_url\_map | Map of registry names to registry URLs |
 

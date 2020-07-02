@@ -1,36 +1,36 @@
 # Changing output names can lead to downstream module issues
-output "registry_id" {
-  value       = var.enabled ? aws_ecr_registry.name[local.image_names[0]].registry_id : ""
-  description = "Registry ID"
+output "repository_id" {
+  value       = var.enabled ? aws_ecr_repository.name[local.image_names[0]].repository_id : ""
+  description = "repository ID"
 }
 
-output "registry_name" {
-  value       = var.enabled ? aws_ecr_registry.name[local.image_names[0]].name : ""
-  description = "Name of first registry created"
+output "repository_name" {
+  value       = var.enabled ? aws_ecr_repository.name[local.image_names[0]].name : ""
+  description = "Name of first repository created"
 }
 
-output "registry_url" {
-  value       = var.enabled ? aws_ecr_registry.name[local.image_names[0]].registry_url : ""
-  description = "URL of first registry created"
+output "repository_url" {
+  value       = var.enabled ? aws_ecr_repository.name[local.image_names[0]].repository_url : ""
+  description = "URL of first repository created"
 }
 
-output "registry_arn" {
-  value       = var.enabled ? aws_ecr_registry.name[local.image_names[0]].arn : ""
-  description = "ARN of first registry created"
+output "repository_arn" {
+  value       = var.enabled ? aws_ecr_repository.name[local.image_names[0]].arn : ""
+  description = "ARN of first repository created"
 }
 
-output "registry_url_map" {
+output "repository_url_map" {
   value = zipmap(
-    values(aws_ecr_registry.name)[*].name,
-    values(aws_ecr_registry.name)[*].registry_url
+    values(aws_ecr_repository.name)[*].name,
+    values(aws_ecr_repository.name)[*].repository_url
   )
-  description = "Map of registry names to registry URLs"
+  description = "Map of repository names to repository URLs"
 }
 
-output "registry_arn_map" {
+output "repository_arn_map" {
   value = zipmap(
-    values(aws_ecr_registry.name)[*].name,
-    values(aws_ecr_registry.name)[*].arn
+    values(aws_ecr_repository.name)[*].name,
+    values(aws_ecr_repository.name)[*].arn
   )
-  description = "Map of registry names to registry ARNs"
+  description = "Map of repository names to repository ARNs"
 }

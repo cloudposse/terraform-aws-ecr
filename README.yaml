@@ -32,9 +32,6 @@ github_repo: cloudposse/terraform-aws-ecr
 
 # Badges to display
 badges:
-  - name: "Codefresh Build Status"
-    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-ecr?type=cf-1"
-    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d182cb1ac440444a6c0082b"
   - name: "Latest Release"
     image: "https://img.shields.io/github/release/cloudposse/terraform-aws-ecr.svg"
     url: "https://github.com/cloudposse/terraform-aws-ecr/releases/latest"

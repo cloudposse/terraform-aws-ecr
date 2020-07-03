@@ -1,6 +1,6 @@
 output "repository_id" {
-  value       = module.ecr.repository_id
-  description = "repository ID"
+  value       = module.ecr.registry_id
+  description = "Repository ID"
 }
 
 output "repository_url" {
@@ -10,5 +10,5 @@ output "repository_url" {
 
 output "repository_name" {
   value       = module.ecr.repository_name
-  description = "repository name"
+  description = "Repository name"
 }

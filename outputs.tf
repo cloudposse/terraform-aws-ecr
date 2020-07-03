@@ -1,6 +1,6 @@
 # Changing output names can lead to downstream module issues
-output "repository_id" {
-  value       = var.enabled ? aws_ecr_repository.name[local.image_names[0]].repository_id : ""
+output "registry_id" {
+  value       = var.enabled ? aws_ecr_repository.name[local.image_names[0]].registry_id : ""
   description = "repository ID"
 }
 

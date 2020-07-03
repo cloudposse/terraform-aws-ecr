@@ -34,7 +34,7 @@ resource "aws_ecr_repository" "name" {
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
-  for_each   = toset(var.enabled ? local.image_names : [])
+  for_each   = toset(var.enabled && var.enable_lifecycle_policy ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
 
   policy = <<EOF

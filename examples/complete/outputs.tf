@@ -1,4 +1,4 @@
-output "repository_id" {
+output "registry_id" {
   value       = module.ecr.registry_id
   description = "Repository ID"
 }

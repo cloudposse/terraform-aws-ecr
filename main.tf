@@ -9,6 +9,7 @@ module "label" {
   enabled             = var.enabled
   namespace           = var.namespace
   stage               = var.stage
+  environment         = var.environment
   name                = var.name
   delimiter           = var.delimiter
   attributes          = var.attributes

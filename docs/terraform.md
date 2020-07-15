@@ -28,6 +28,7 @@
 | namespace | Namespace (e.g. `eg` or `cp`) | `string` | `""` | no |
 | principals\_full\_access | Principal ARNs to provide with full access to the ECR | `list(string)` | `[]` | no |
 | principals\_readonly\_access | Principal ARNs to provide with readonly access to the ECR | `list(string)` | `[]` | no |
+| protected\_tags | Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod` | `set(string)` | `[]` | no |
 | regex\_replace\_chars | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`. By default only letters, digits, dash, slash, and underscore are allowed, all other chars are removed | `string` | `"/[^a-z/A-Z_0-9-]/"` | no |
 | scan\_images\_on\_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | `bool` | `false` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | `string` | `""` | no |

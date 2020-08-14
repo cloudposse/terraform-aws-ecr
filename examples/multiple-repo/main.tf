@@ -8,5 +8,5 @@ module "ecr" {
   stage        = "dev"
   name         = "app"
   use_fullname = false
-  list_image   = ["redis", "nginx"]
+  image_names  = ["redis", "nginx"]
 }

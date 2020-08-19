@@ -3,7 +3,7 @@
 | Name | Version |
 |------|---------|
 | terraform | >= 0.12.0, < 0.14.0 |
-| aws | ~> 2.34 |
+| aws | >= 2.34, < 4.0 |
 | local | ~> 1.2 |
 | template | ~> 2.0 |
 
@@ -11,7 +11,7 @@
 
 | Name | Version |
 |------|---------|
-| aws | ~> 2.34 |
+| aws | >= 2.34, < 4.0 |
 
 ## Inputs
 
@@ -46,4 +46,5 @@
 | repository\_name | Name of first repository created |
 | repository\_url | URL of first repository created |
 | repository\_url\_map | Map of repository names to repository URLs |
+
 

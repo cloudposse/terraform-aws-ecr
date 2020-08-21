@@ -104,3 +104,12 @@ variable "protected_tags" {
   description = "Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod`"
   default     = []
 }
+
+variable "encryption_configuration" {
+  type = object({
+    encryption_type = string
+    kms_key         = any
+  })
+  description = "ECR encryption configuration"
+  default     = null
+}

@@ -21,6 +21,7 @@
 | delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | `string` | `"-"` | no |
 | enable\_lifecycle\_policy | Set to false to prevent the module from adding any lifecycle policies to any repositories | `bool` | `true` | no |
 | enabled | Set to false to prevent the module from creating any resources | `bool` | `true` | no |
+| encryption\_configuration | ECR encryption configuration | <pre>object({<br>    encryption_type = string<br>    kms_key         = any<br>  })</pre> | `null` | no |
 | environment | Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT' | `string` | `""` | no |
 | image\_names | List of Docker local image names, used as repository names for AWS ECR | `list(string)` | `[]` | no |
 | image\_tag\_mutability | The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE` | `string` | `"MUTABLE"` | no |
@@ -46,5 +47,4 @@
 | repository\_name | Name of first repository created |
 | repository\_url | URL of first repository created |
 | repository\_url\_map | Map of repository names to repository URLs |
-
 

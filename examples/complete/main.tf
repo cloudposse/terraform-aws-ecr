@@ -3,9 +3,9 @@ provider "aws" {
 }
 
 module "ecr" {
-  source                   = "../../"
-  namespace                = var.namespace
-  stage                    = var.stage
-  name                     = var.name
+  source = "../../"
+
   encryption_configuration = var.encryption_configuration
+
+  context = module.this.context
 }

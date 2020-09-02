@@ -4,26 +4,13 @@ locals {
   ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? true : false
 }
 
-module "label" {
-  source              = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.17.0"
-  enabled             = var.enabled
-  namespace           = var.namespace
-  stage               = var.stage
-  environment         = var.environment
-  name                = var.name
-  delimiter           = var.delimiter
-  attributes          = var.attributes
-  tags                = var.tags
-  regex_replace_chars = var.regex_replace_chars
-}
-
 locals {
-  _name       = var.use_fullname ? module.label.id : module.label.name
+  _name       = var.use_fullname ? module.this.id : module.this.name
   image_names = length(var.image_names) > 0 ? var.image_names : [local._name]
 }
 
 resource "aws_ecr_repository" "name" {
-  for_each             = toset(var.enabled ? local.image_names : [])
+  for_each             = toset(module.this.enabled ? local.image_names : [])
   name                 = each.value
   image_tag_mutability = var.image_tag_mutability
 
@@ -39,7 +26,7 @@ resource "aws_ecr_repository" "name" {
     scan_on_push = var.scan_images_on_push
   }
 
-  tags = module.label.tags
+  tags = module.this.tags
 }
 
 locals {
@@ -88,7 +75,7 @@ locals {
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
-  for_each   = toset(var.enabled && var.enable_lifecycle_policy ? local.image_names : [])
+  for_each   = toset(module.this.enabled && var.enable_lifecycle_policy ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
 
   policy = jsonencode({
@@ -97,11 +84,11 @@ resource "aws_ecr_lifecycle_policy" "name" {
 }
 
 data "aws_iam_policy_document" "empty" {
-  count = var.enabled ? 1 : 0
+  count = module.this.enabled ? 1 : 0
 }
 
 data "aws_iam_policy_document" "resource_readonly_access" {
-  count = var.enabled ? 1 : 0
+  count = module.this.enabled ? 1 : 0
 
   statement {
     sid    = "ReadonlyAccess"
@@ -128,7 +115,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
 }
 
 data "aws_iam_policy_document" "resource_full_access" {
-  count = var.enabled ? 1 : 0
+  count = module.this.enabled ? 1 : 0
 
   statement {
     sid    = "FullAccess"
@@ -164,13 +151,13 @@ data "aws_iam_policy_document" "resource_full_access" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  count         = var.enabled ? 1 : 0
+  count         = module.this.enabled ? 1 : 0
   source_json   = local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
   override_json = local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
 }
 
 resource "aws_ecr_repository_policy" "name" {
-  for_each   = toset(local.ecr_need_policy && var.enabled ? local.image_names : [])
+  for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
   policy     = join("", data.aws_iam_policy_document.resource.*.json)
 }

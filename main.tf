@@ -101,15 +101,18 @@ data "aws_iam_policy_document" "resource_readonly_access" {
     }
 
     actions = [
-      "ecr:GetAuthorizationToken",
       "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetRepositoryPolicy",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:DescribeImages",
       "ecr:BatchGetImage",
       "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetAuthorizationToken",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:ListTagsForResource",
     ]
   }
 }
@@ -127,26 +130,7 @@ data "aws_iam_policy_document" "resource_full_access" {
       identifiers = var.principals_full_access
     }
 
-    actions = [
-      "ecr:GetAuthorizationToken",
-      "ecr:InitiateLayerUpload",
-      "ecr:UploadLayerPart",
-      "ecr:CompleteLayerUpload",
-      "ecr:PutImage",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetRepositoryPolicy",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:DescribeImages",
-      "ecr:BatchGetImage",
-      "ecr:DescribeImageScanFindings",
-      "ecr:StartImageScan",
-      "ecr:BatchDeleteImage",
-      "ecr:SetRepositoryPolicy",
-      "ecr:DeleteRepositoryPolicy",
-      "ecr:DeleteRepository",
-    ]
+    actions = ["ecr:*"]
   }
 }
 

@@ -106,7 +106,6 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       "ecr:DescribeImageScanFindings",
       "ecr:DescribeImages",
       "ecr:DescribeRepositories",
-      "ecr:GetAuthorizationToken",
       "ecr:GetDownloadUrlForLayer",
       "ecr:GetLifecyclePolicy",
       "ecr:GetLifecyclePolicyPreview",

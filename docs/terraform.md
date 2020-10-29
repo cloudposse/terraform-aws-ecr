@@ -1,10 +1,9 @@
-<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
 | terraform | >= 0.13.3 |
-| aws | >= 3.0, < 4.0 |
+| aws | >= 3.1 |
 | local | >= 1.3 |
 | template | >= 2.0 |
 
@@ -12,7 +11,7 @@
 
 | Name | Version |
 |------|---------|
-| aws | >= 3.0, < 4.0 |
+| aws | >= 3.1 |
 
 ## Inputs
 
@@ -53,4 +52,3 @@
 | repository\_url | URL of first repository created |
 | repository\_url\_map | Map of repository names to repository URLs |
 
-<!-- markdownlint-restore -->

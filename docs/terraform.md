@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
@@ -52,3 +53,4 @@
 | repository\_url | URL of first repository created |
 | repository\_url\_map | Map of repository names to repository URLs |
 
+<!-- markdownlint-restore -->

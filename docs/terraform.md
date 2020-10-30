@@ -3,7 +3,7 @@
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.13.3 |
+| terraform | >= 0.12 |
 | aws | >= 3.1 |
 | local | >= 1.2 |
 | template | >= 2.0 |

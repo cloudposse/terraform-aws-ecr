@@ -3,8 +3,8 @@
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.0 |
-| aws | >= 2.34 |
+| terraform | >= 0.12 |
+| aws | >= 3.1 |
 | local | >= 1.2 |
 | template | >= 2.0 |
 
@@ -12,7 +12,7 @@
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.34 |
+| aws | >= 3.1 |
 
 ## Inputs
 

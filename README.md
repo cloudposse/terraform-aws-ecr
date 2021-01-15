@@ -128,8 +128,6 @@ Available targets:
 |------|---------|
 | terraform | >= 0.12 |
 | aws | >= 3.1 |
-| local | >= 1.2 |
-| template | >= 2.0 |
 
 ## Providers
 

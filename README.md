@@ -103,7 +103,9 @@ data "aws_iam_role" "ecr" {
 }
 
 module "ecr" {
-  source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+  source = "cloudposse/ecr/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
   namespace              = "eg"
   stage                  = "test"
   name                   = "ecr"
@@ -133,7 +135,7 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12 |
+| terraform | >= 0.12.26 |
 | aws | >= 3.1 |
 
 ## Providers

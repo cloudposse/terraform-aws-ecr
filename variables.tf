@@ -19,7 +19,7 @@ variable "principals_readonly_access" {
 variable "scan_images_on_push" {
   type        = bool
   description = "Indicates whether images are scanned after being pushed to the repository (true) or not (false)"
-  default     = false
+  default     = true
 }
 
 variable "max_image_count" {
@@ -36,7 +36,7 @@ variable "image_names" {
 
 variable "image_tag_mutability" {
   type        = string
-  default     = "MUTABLE"
+  default     = "IMMUTABLE"
   description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
 }
 

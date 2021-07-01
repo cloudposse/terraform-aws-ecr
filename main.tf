@@ -26,7 +26,7 @@ resource "aws_ecr_repository" "name" {
     scan_on_push = var.scan_images_on_push
   }
 
-  tags = merge(module.this.tags, { Name = each.value })
+  tags = module.repository_label[each.value].tags
 }
 
 locals {

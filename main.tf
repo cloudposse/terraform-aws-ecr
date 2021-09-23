@@ -126,6 +126,11 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       effect  = "Allow"
       actions = local.read_only_actions
 
+      principals {
+        identifiers = ["*"]
+        type        = "*"
+      }
+
       condition {
         test     = "StringEquals"
         values   = [statement.value]
@@ -159,6 +164,11 @@ data "aws_iam_policy_document" "resource_full_access" {
       sid     = "OrganizationReadonlyAccess"
       effect  = "Allow"
       actions = local.read_only_actions
+
+      principals {
+        identifiers = ["*"]
+        type        = "*"
+      }
 
       condition {
         test     = "StringEquals"

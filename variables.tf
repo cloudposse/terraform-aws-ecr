@@ -60,3 +60,9 @@ variable "encryption_configuration" {
   description = "ECR encryption configuration"
   default     = null
 }
+
+variable "organizations_readonly_access" {
+  type        = list(string)
+  description = "Organization IDs to provide with readonly access to the ECR."
+  default     = []
+}

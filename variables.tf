@@ -16,6 +16,12 @@ variable "principals_readonly_access" {
   default     = []
 }
 
+variable "principals_lambda" {
+  type        = list(string)
+  description = "Principal account IDs of Lambdas allowed to consume ECR"
+  default     = []
+}
+
 variable "scan_images_on_push" {
   type        = bool
   description = "Indicates whether images are scanned after being pushed to the repository (true) or not (false)"

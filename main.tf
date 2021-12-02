@@ -1,6 +1,8 @@
 locals {
   principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0 ? true : false
+  principals_readonly_access_lambda    = length(var.principals_lambda) > 0 ? true : false
   principals_full_access_non_empty     = length(var.principals_full_access) > 0 ? true : false
+  principals_full_access_lambda        = length(var.principals_lambda) > 0 ? true : false
   ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? true : false
 }
 
@@ -116,6 +118,73 @@ data "aws_iam_policy_document" "resource_readonly_access" {
   }
 }
 
+data "aws_iam_policy_document" "resource_readonly_lambda_access" {
+  count = module.this.enabled ? 1 : 0
+
+  statement {
+    sid    = "ReadonlyAccess"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+
+      identifiers = var.principals_readonly_access
+    }
+
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:ListTagsForResource",
+    ]
+  }
+
+  statement {
+    sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "aws:sourceArn"
+      values   = formatlist("arn:aws:lambda:*:%s:function:*", var.principals_lambda)
+    }
+  }
+
+  statement {
+    sid    = "CrossAccountPermission"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+
+      identifiers = var.principals_lambda
+    }
+
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "resource_full_access" {
   count = module.this.enabled ? 1 : 0
 
@@ -133,10 +202,65 @@ data "aws_iam_policy_document" "resource_full_access" {
   }
 }
 
+data "aws_iam_policy_document" "resource_full_lambda_access" {
+  count = module.this.enabled ? 1 : 0
+
+  statement {
+    sid    = "FullAccess"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+
+      identifiers = var.principals_full_access
+    }
+
+    actions = ["ecr:*"]
+  }
+
+  statement {
+    sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "aws:sourceArn"
+      values   = formatlist("arn:aws:lambda:*:%s:function:*", var.principals_lambda)
+    }
+  }
+
+  statement {
+    sid    = "CrossAccountPermission"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+
+      identifiers = var.principals_lambda
+    }
+
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "resource" {
   count         = module.this.enabled ? 1 : 0
-  source_json   = local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
-  override_json = local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
+  source_json   = local.principals_readonly_access_lambda && local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_lambda_access[0].json]) : local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
+  override_json = local.principals_readonly_access_lambda && local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_lambda_access[0].json]) : local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
 }
 
 resource "aws_ecr_repository_policy" "name" {

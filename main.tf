@@ -1,6 +1,6 @@
 locals {
   principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0 ? true : false
-  principals_readonly_access_lambda    = length(var.principals_lambda) > 0 ? true : false
+  principals_readonly_access_lambda    = length(var.principals_lambda) > 0
   principals_full_access_non_empty     = length(var.principals_full_access) > 0 ? true : false
   principals_full_access_lambda        = length(var.principals_lambda) > 0
   ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? true : false
@@ -118,6 +118,8 @@ data "aws_iam_policy_document" "resource_readonly_access" {
   }
 }
 
+data "aws_partition" "current" {}
+
 data "aws_iam_policy_document" "resource_readonly_lambda_access" {
   count = module.this.enabled ? 1 : 0
 
@@ -164,7 +166,7 @@ data "aws_iam_policy_document" "resource_readonly_lambda_access" {
     condition {
       test     = "StringLike"
       variable = "aws:sourceArn"
-      values   = formatlist("arn:aws:lambda:*:%s:function:*", var.principals_lambda)
+      values   = formatlist("arn:${data.aws_partition.current.partition}:lambda:*:%s:function:*", var.principals_lambda)
     }
   }
 
@@ -236,7 +238,7 @@ data "aws_iam_policy_document" "resource_full_lambda_access" {
     condition {
       test     = "StringLike"
       variable = "aws:sourceArn"
-      values   = formatlist("arn:aws:lambda:*:%s:function:*", var.principals_lambda)
+      values   = formatlist("arn:${data.aws_partition.current.partition}:lambda:*:%s:function:*", var.principals_lambda)
     }
   }
 

@@ -135,7 +135,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
 
       condition {
         test     = "StringLike"
-        values   = formatlist("arn:${data.aws_partition.current.partition}:lambda:*:%s:function:*", var.principals_lambda)
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
         variable = "aws:sourceArn"
       }
     }
@@ -150,7 +150,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       principals {
         type = "AWS"
 
-        identifiers = formatlist("arn:${data.aws_partition.current.partition}:iam::%s:root", var.principals_lambda)
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
       }
 
       actions = [
@@ -196,7 +196,7 @@ data "aws_iam_policy_document" "resource_full_access" {
 
       condition {
         test     = "StringLike"
-        values   = formatlist("arn:${data.aws_partition.current.partition}:lambda:*:%s:function:*", var.principals_lambda)
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
         variable = "aws:sourceArn"
       }
     }
@@ -211,7 +211,7 @@ data "aws_iam_policy_document" "resource_full_access" {
       principals {
         type = "AWS"
 
-        identifiers = formatlist("arn:${data.aws_partition.current.partition}:iam::%s:root", var.principals_lambda)
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
       }
 
       actions = [

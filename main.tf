@@ -223,9 +223,9 @@ data "aws_iam_policy_document" "resource_full_access" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  count         = module.this.enabled ? 1 : 0
-  source_json   = local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
-  override_json = local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
+  count                     = module.this.enabled ? 1 : 0
+  source_policy_documents   = local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
+  override_policy_documents = local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
 }
 
 resource "aws_ecr_repository_policy" "name" {

@@ -87,21 +87,7 @@ data "aws_iam_policy_document" "empty" {
   count = module.this.enabled ? 1 : 0
 }
 
-locals {
-  read_only_actions = [
-    "ecr:BatchCheckLayerAvailability",
-    "ecr:BatchGetImage",
-    "ecr:DescribeImageScanFindings",
-    "ecr:DescribeImages",
-    "ecr:DescribeRepositories",
-    "ecr:GetDownloadUrlForLayer",
-    "ecr:GetLifecyclePolicy",
-    "ecr:GetLifecyclePolicyPreview",
-    "ecr:GetRepositoryPolicy",
-    "ecr:ListImages",
-    "ecr:ListTagsForResource",
-  ]
-}
+data "aws_partition" "current" {}
 
 data "aws_iam_policy_document" "resource_readonly_access" {
   count = module.this.enabled ? 1 : 0
@@ -116,29 +102,64 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       identifiers = var.principals_readonly_access
     }
 
-    actions = local.read_only_actions
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:ListTagsForResource",
+    ]
   }
 
   dynamic "statement" {
-    for_each = var.organizations_readonly_access
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+
     content {
-      sid     = "OrganizationReadonlyAccess"
-      effect  = "Allow"
-      actions = local.read_only_actions
+      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+      effect = "Allow"
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
 
       principals {
-        identifiers = ["*"]
-        type        = "*"
+        type        = "Service"
+        identifiers = ["lambda.amazonaws.com"]
       }
 
       condition {
-        test     = "StringEquals"
-        values   = [statement.value]
-        variable = "aws:PrincipalOrgID"
-
+        test     = "StringLike"
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
+        variable = "aws:sourceArn"
       }
     }
   }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+    content {
+      sid    = "CrossAccountPermission"
+      effect = "Allow"
+
+      principals {
+        type = "AWS"
+
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
+      }
+
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+    }
+  }
+
 }
 
 data "aws_iam_policy_document" "resource_full_access" {
@@ -158,23 +179,45 @@ data "aws_iam_policy_document" "resource_full_access" {
   }
 
   dynamic "statement" {
-    for_each = var.organizations_readonly_access
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
 
     content {
-      sid     = "OrganizationReadonlyAccess"
-      effect  = "Allow"
-      actions = local.read_only_actions
+      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+      effect = "Allow"
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
 
       principals {
-        identifiers = ["*"]
-        type        = "*"
+        type        = "Service"
+        identifiers = ["lambda.amazonaws.com"]
       }
 
       condition {
-        test     = "StringEquals"
-        values   = [statement.value]
-        variable = "aws:PrincipalOrgID"
+        test     = "StringLike"
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
+        variable = "aws:sourceArn"
       }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+    content {
+      sid    = "CrossAccountPermission"
+      effect = "Allow"
+
+      principals {
+        type = "AWS"
+
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
+      }
+
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
     }
   }
 }

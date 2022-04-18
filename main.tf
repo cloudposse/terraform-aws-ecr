@@ -171,7 +171,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
     for_each = var.organizations_readonly_access
 
     content {
-      sid     = "OrganizationReadonlyAccess"
+      sid     = "OrganizationReadonlyAccess_${statement.value}"
       effect  = "Allow"
       actions = local.actions.read_only
 
@@ -247,7 +247,7 @@ data "aws_iam_policy_document" "resource_full_access" {
     for_each = var.organizations_full_access
 
     content {
-      sid     = "OrganizationFullAccess"
+      sid     = "OrganizationFullAccess_${statement.value}"
       effect  = "Allow"
       actions = local.actions.full_access
 

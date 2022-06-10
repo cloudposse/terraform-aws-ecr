@@ -2,7 +2,7 @@ locals {
   principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0
   principals_push_access_non_empty     = length(var.principals_push_access) > 0
   principals_full_access_non_empty     = length(var.principals_full_access) > 0
-  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) > 0 ? true : false
+  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) > 0
 }
 
 locals {

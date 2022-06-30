@@ -250,10 +250,10 @@ data "aws_iam_policy_document" "resource_full_access" {
 data "aws_iam_policy_document" "resource" {
   count                   = module.this.enabled ? 1 : 0
   source_policy_documents = local.principals_readonly_access_non_empty ? [data.aws_iam_policy_document.resource_readonly_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
-  override_policy_documents = [
+  override_policy_documents = distinct([
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
-  ]
+  ])
 }
 
 resource "aws_ecr_repository_policy" "name" {

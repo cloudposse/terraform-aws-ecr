@@ -185,6 +185,49 @@ data "aws_iam_policy_document" "resource_push_access" {
       "ecr:PutImage",
     ]
   }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+
+    content {
+      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+      effect = "Allow"
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+
+      principals {
+        type        = "Service"
+        identifiers = ["lambda.amazonaws.com"]
+      }
+
+      condition {
+        test     = "StringLike"
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
+        variable = "aws:sourceArn"
+      }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+    content {
+      sid    = "CrossAccountPermission"
+      effect = "Allow"
+
+      principals {
+        type = "AWS"
+
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
+      }
+
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+    }
+  }
 }
 
 data "aws_iam_policy_document" "resource_full_access" {

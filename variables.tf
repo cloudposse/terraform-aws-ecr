@@ -69,6 +69,6 @@ variable "encryption_configuration" {
 
 variable "force_delete" {
   type        = bool
-  description = "If true, will delete the repository even if it contains images. Defaults to false"
+  description = "Whether to delete the repository even if it contains images"
   default     = false
 }

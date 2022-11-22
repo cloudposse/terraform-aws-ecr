@@ -66,3 +66,9 @@ variable "encryption_configuration" {
   description = "ECR encryption configuration"
   default     = null
 }
+
+variable "force_delete" {
+  type        = bool
+  description = "Whether to delete the repository even if it contains images"
+  default     = false
+}

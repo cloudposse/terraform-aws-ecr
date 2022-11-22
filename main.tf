@@ -13,6 +13,7 @@ resource "aws_ecr_repository" "name" {
   for_each             = toset(module.this.enabled ? local.image_names : [])
   name                 = each.value
   image_tag_mutability = var.image_tag_mutability
+  force_delete         = var.force_delete
 
   dynamic "encryption_configuration" {
     for_each = var.encryption_configuration == null ? [] : [var.encryption_configuration]

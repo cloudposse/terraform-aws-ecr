@@ -1,36 +1,33 @@
+---
 name: Release
-
 on:
-  workflow_dispatch:
   push:
     branches:
-      - main
-      - master
-    paths:
-      - '**/*.tpl'
-      - '**/*.py'
-      - '**/*.tf'
-      - '.github/workflows/release.yml'
+      - "main"
+  workflow_dispatch:
 
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-latest
-    # Skip running release workflow on forks
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
           fetch-depth: 0
-
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v2
+      - uses: actions/setup-node@v3
         with:
-          semantic_version: 18.0.0
-          extra_plugins: |
-            @semantic-release/changelog@6.0.0
-            @semantic-release/git@10.0.0
-            conventional-changelog-conventionalcommits@4.6.3
+          node-version: 16
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GH_BACKUP_TOKEN }}
+        with:
+          semantic_version: 19.0.5
+          extra_plugins: |
+            @semantic-release/commit-analyzer@v9.0.2
+            @semantic-release/changelog@v6.0.1
+            @semantic-release/git@v10.0.1
+            conventional-changelog-conventionalcommits@5.0.0

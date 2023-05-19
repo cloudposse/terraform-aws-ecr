@@ -177,7 +177,7 @@ data "aws_iam_policy_document" "lambda_access" {
 
     condition {
       test     = "StringLike"
-      values   = var.principals_lambda_non_empty ? formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda) : []
+      values   = local.principals_lambda_non_empty ? formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda) : []
       variable = "aws:SourceArn"
     }
   }
@@ -192,7 +192,7 @@ data "aws_iam_policy_document" "lambda_access" {
 
     principals {
       type        = "AWS"
-      identifiers = var.principals_lambda_non_empty ? formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda) : []
+      identifiers = local.principals_lambda_non_empty ? formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda) : []
     }
   }
 }

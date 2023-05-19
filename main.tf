@@ -100,7 +100,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
     effect = "Allow"
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = var.principals_readonly_access
     }
 
@@ -128,7 +128,7 @@ data "aws_iam_policy_document" "resource_push_access" {
     effect = "Allow"
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = var.principals_push_access
     }
 
@@ -151,7 +151,7 @@ data "aws_iam_policy_document" "resource_full_access" {
     effect = "Allow"
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = var.principals_full_access
     }
 
@@ -191,7 +191,7 @@ data "aws_iam_policy_document" "lambda_access" {
     ]
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = var.principals_lambda_non_empty ? formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda) : []
     }
   }

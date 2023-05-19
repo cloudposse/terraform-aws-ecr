@@ -2,7 +2,8 @@ locals {
   principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0
   principals_push_access_non_empty     = length(var.principals_push_access) > 0
   principals_full_access_non_empty     = length(var.principals_full_access) > 0
-  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) > 0
+  principals_lambda_non_empty          = length(var.principals_lambda) > 0
+  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) + length(var.principals_lambda) > 0
 }
 
 locals {
@@ -100,7 +101,6 @@ data "aws_iam_policy_document" "resource_readonly_access" {
 
     principals {
       type = "AWS"
-
       identifiers = var.principals_readonly_access
     }
 
@@ -118,49 +118,6 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       "ecr:ListTagsForResource",
     ]
   }
-
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
-
-    content {
-      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
-      effect = "Allow"
-      actions = [
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer"
-      ]
-
-      principals {
-        type        = "Service"
-        identifiers = ["lambda.amazonaws.com"]
-      }
-
-      condition {
-        test     = "StringLike"
-        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
-        variable = "aws:sourceArn"
-      }
-    }
-  }
-
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
-    content {
-      sid    = "CrossAccountPermission"
-      effect = "Allow"
-
-      principals {
-        type = "AWS"
-
-        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
-      }
-
-      actions = [
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer"
-      ]
-    }
-  }
 }
 
 data "aws_iam_policy_document" "resource_push_access" {
@@ -172,7 +129,6 @@ data "aws_iam_policy_document" "resource_push_access" {
 
     principals {
       type = "AWS"
-
       identifiers = var.principals_push_access
     }
 
@@ -196,53 +152,47 @@ data "aws_iam_policy_document" "resource_full_access" {
 
     principals {
       type = "AWS"
-
       identifiers = var.principals_full_access
     }
 
     actions = ["ecr:*"]
   }
+}
 
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
+data "aws_iam_policy_document" "lambda_access" {
+  count = module.this.enabled ? 1 : 0
 
-    content {
-      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
-      effect = "Allow"
-      actions = [
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer"
-      ]
+  statement {
+    sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+    effect = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
 
-      principals {
-        type        = "Service"
-        identifiers = ["lambda.amazonaws.com"]
-      }
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
 
-      condition {
-        test     = "StringLike"
-        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
-        variable = "aws:sourceArn"
-      }
+    condition {
+      test     = "StringLike"
+      values   = var.principals_lambda_non_empty ? formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda) : []
+      variable = "aws:SourceArn"
     }
   }
 
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
-    content {
-      sid    = "CrossAccountPermission"
-      effect = "Allow"
+  statement {
+    sid    = "CrossAccountPermission"
+    effect = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
 
-      principals {
-        type = "AWS"
-
-        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
-      }
-
-      actions = [
-        "ecr:BatchGetImage",
-        "ecr:GetDownloadUrlForLayer"
-      ]
+    principals {
+      type = "AWS"
+      identifiers = var.principals_lambda_non_empty ? formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda) : []
     }
   }
 }
@@ -253,11 +203,12 @@ data "aws_iam_policy_document" "resource" {
   override_policy_documents = distinct([
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
   ])
 }
 
 resource "aws_ecr_repository_policy" "name" {
   for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
-  policy     = join("", data.aws_iam_policy_document.resource.*.json)
+  policy     = join("", data.aws_iam_policy_document.resource[*].json)
 }

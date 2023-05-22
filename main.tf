@@ -96,6 +96,14 @@ locals {
       "ecr:BatchGetImage",
       "ecr:GetDownloadUrlForLayer"
     ]
+    push_access = [
+      "ecr:CompleteLayerUpload",
+      "ecr:GetAuthorizationToken",
+      "ecr:UploadLayerPart",
+      "ecr:InitiateLayerUpload",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+    ]
   }
 
 
@@ -204,14 +212,7 @@ data "aws_iam_policy_document" "resource_push_access" {
       identifiers = var.principals_push_access
     }
 
-    actions = [
-      "ecr:CompleteLayerUpload",
-      "ecr:GetAuthorizationToken",
-      "ecr:UploadLayerPart",
-      "ecr:InitiateLayerUpload",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage",
-    ]
+    actions = local.actions.push_access
   }
 }
 

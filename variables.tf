@@ -10,6 +10,12 @@ variable "principals_full_access" {
   default     = []
 }
 
+variable "principals_push_access" {
+  type        = list(string)
+  description = "Principal ARNs to provide with push access to the ECR"
+  default     = []
+}
+
 variable "principals_readonly_access" {
   type        = list(string)
   description = "Principal ARNs to provide with readonly access to the ECR"
@@ -67,6 +73,11 @@ variable "encryption_configuration" {
   default     = null
 }
 
+variable "force_delete" {
+  type        = bool
+  description = "Whether to delete the repository even if it contains images"
+  default     = false
+}
 variable "organizations_readonly_access" {
   type        = list(string)
   description = "Organization IDs to provide with readonly access to the ECR."

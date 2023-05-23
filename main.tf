@@ -234,3 +234,33 @@ resource "aws_ecr_repository_policy" "name" {
   repository = aws_ecr_repository.name[each.value].name
   policy     = join("", data.aws_iam_policy_document.resource.*.json)
 }
+
+resource "aws_ecr_repository_policy" "ecr_repos_policy" {
+  for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
+  repository = aws_ecr_repository.name[each.value].name
+  policy = <<EOF
+  {
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPullOnlyAccountsInOrganization",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:DescribeImages",
+        "ecr:DescribeRepositories",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:ListImages"
+      ],
+      "Condition": {
+        "ForAnyValue:StringLike": {
+          "aws:PrincipalOrgPaths": "o-rbtym59gdv/r-7f1e/ou-*/*"
+        }
+      }
+    }
+  ]
+}
+  EOF
+}

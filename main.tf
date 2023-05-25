@@ -1,7 +1,8 @@
 locals {
-  principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0 ? true : false
-  principals_full_access_non_empty     = length(var.principals_full_access) > 0 ? true : false
-  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) > 0 ? true : false
+  principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0
+  principals_push_access_non_empty     = length(var.principals_push_access) > 0
+  principals_full_access_non_empty     = length(var.principals_full_access) > 0
+  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) > 0
 }
 
 locals {
@@ -160,7 +161,30 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       ]
     }
   }
+}
 
+data "aws_iam_policy_document" "resource_push_access" {
+  count = module.this.enabled ? 1 : 0
+
+  statement {
+    sid    = "PushAccess"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+
+      identifiers = var.principals_push_access
+    }
+
+    actions = [
+      "ecr:CompleteLayerUpload",
+      "ecr:GetAuthorizationToken",
+      "ecr:UploadLayerPart",
+      "ecr:InitiateLayerUpload",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+    ]
+  }
 }
 
 data "aws_iam_policy_document" "resource_full_access" {
@@ -224,9 +248,12 @@ data "aws_iam_policy_document" "resource_full_access" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  count                     = module.this.enabled ? 1 : 0
-  source_policy_documents   = local.principals_readonly_access_non_empty ? [data.aws_iam_policy_document.resource_readonly_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
-  override_policy_documents = local.principals_full_access_non_empty ? [data.aws_iam_policy_document.resource_full_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
+  count                   = module.this.enabled ? 1 : 0
+  source_policy_documents = local.principals_readonly_access_non_empty ? [data.aws_iam_policy_document.resource_readonly_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
+  override_policy_documents = distinct([
+    local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+  ])
 }
 
 resource "aws_ecr_repository_policy" "name" {

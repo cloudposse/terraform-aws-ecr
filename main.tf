@@ -160,7 +160,7 @@ data "aws_iam_policy_document" "resource_full_access" {
 }
 
 data "aws_iam_policy_document" "lambda_access" {
-  count = module.this.enabled ? 1 : 0
+  count = module.this.enabled && length(var.principals_lambda) > 0 ? 1 : 0
 
   statement {
     sid    = "LambdaECRImageCrossAccountRetrievalPolicy"

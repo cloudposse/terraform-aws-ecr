@@ -223,12 +223,17 @@ data "aws_iam_policy_document" "organizations_readonly_access" {
     }
 
     actions = [
-      "ecr:CompleteLayerUpload",
-      "ecr:GetAuthorizationToken",
-      "ecr:UploadLayerPart",
-      "ecr:InitiateLayerUpload",
       "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:ListTagsForResource",
     ]
   }
 }
@@ -276,7 +281,12 @@ data "aws_iam_policy_document" "organization_push_access" {
     }
 
     actions = [
-      "ecr:*",
+      "ecr:CompleteLayerUpload",
+      "ecr:GetAuthorizationToken",
+      "ecr:UploadLayerPart",
+      "ecr:InitiateLayerUpload",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
     ]
   }
 }

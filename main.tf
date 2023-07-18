@@ -1,10 +1,12 @@
 locals {
   principals_readonly_access_non_empty    = length(var.principals_readonly_access) > 0
-  principals_push_access_non_empty     = length(var.principals_push_access) > 0
+  principals_push_access_non_empty        = length(var.principals_push_access) > 0
   principals_full_access_non_empty        = length(var.principals_full_access) > 0
-  organizations_readonly_access_non_empty = length(var.organizations_readonly_access) > 0 ? true : false
-  organizations_full_access_non_empty     = length(var.organizations_full_access) > 0 ? true : false
-  ecr_need_policy                         = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) > 0
+  principals_lambda_non_empty             = length(var.principals_lambda) > 0
+  organizations_readonly_access_non_empty = length(var.organizations_readonly_access) > 0
+  organizations_full_access_non_empty     = length(var.organizations_full_access) > 0
+  organizations_push_non_empty            = length(var.organizations_push_access) > 0
+  ecr_need_policy                         = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) + length(var.principals_lambda) + length(var.organizations_readonly_access) + length(var.organizations_full_access) + length(var.organizations_push_access) > 0
 }
 
 locals {
@@ -34,38 +36,42 @@ resource "aws_ecr_repository" "name" {
 }
 
 locals {
-  untagged_image_rule = [{
-    rulePriority = length(var.protected_tags) + 1
-    description  = "Remove untagged images"
-    selection = {
-      tagStatus   = "untagged"
-      countType   = "imageCountMoreThan"
-      countNumber = 1
+  untagged_image_rule = [
+    {
+      rulePriority = length(var.protected_tags) + 1
+      description  = "Remove untagged images"
+      selection    = {
+        tagStatus   = "untagged"
+        countType   = "imageCountMoreThan"
+        countNumber = 1
+      }
+      action = {
+        type = "expire"
+      }
     }
-    action = {
-      type = "expire"
-    }
-  }]
+  ]
 
-  remove_old_image_rule = [{
-    rulePriority = length(var.protected_tags) + 2
-    description  = "Rotate images when reach ${var.max_image_count} images stored",
-    selection = {
-      tagStatus   = "any"
-      countType   = "imageCountMoreThan"
-      countNumber = var.max_image_count
+  remove_old_image_rule = [
+    {
+      rulePriority = length(var.protected_tags) + 2
+      description  = "Rotate images when reach ${var.max_image_count} images stored",
+      selection    = {
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = var.max_image_count
+      }
+      action = {
+        type = "expire"
+      }
     }
-    action = {
-      type = "expire"
-    }
-  }]
+  ]
 
   protected_tag_rules = [
     for index, tagPrefix in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
     {
       rulePriority = tonumber(index) + 1
       description  = "Protects images tagged with ${tagPrefix}"
-      selection = {
+      selection    = {
         tagStatus     = "tagged"
         tagPrefixList = [tagPrefix]
         countType     = "imageCountMoreThan"
@@ -76,37 +82,6 @@ locals {
       }
     }
   ]
-
-  actions = {
-    read_only = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchGetImage",
-      "ecr:DescribeImageScanFindings",
-      "ecr:DescribeImages",
-      "ecr:DescribeRepositories",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetLifecyclePolicy",
-      "ecr:GetLifecyclePolicyPreview",
-      "ecr:GetRepositoryPolicy",
-      "ecr:ListImages",
-      "ecr:ListTagsForResource",
-    ]
-    full_access = ["ecr:*"]
-    lambda_access = [
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer"
-    ]
-    push_access = [
-      "ecr:CompleteLayerUpload",
-      "ecr:GetAuthorizationToken",
-      "ecr:UploadLayerPart",
-      "ecr:InitiateLayerUpload",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:PutImage",
-    ]
-  }
-
-
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
@@ -132,70 +107,23 @@ data "aws_iam_policy_document" "resource_readonly_access" {
     effect = "Allow"
 
     principals {
-      type = "AWS"
-
+      type        = "AWS"
       identifiers = var.principals_readonly_access
     }
 
-    actions = local.actions.read_only
-  }
-
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
-
-    content {
-      sid     = "LambdaECRImageCrossAccountRetrievalPolicy"
-      effect  = "Allow"
-      actions = local.actions.lambda_access
-
-      principals {
-        type        = "Service"
-        identifiers = ["lambda.amazonaws.com"]
-      }
-
-      condition {
-        test     = "StringLike"
-        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
-        variable = "aws:sourceArn"
-      }
-    }
-  }
-
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
-    content {
-      sid    = "CrossAccountPermission"
-      effect = "Allow"
-
-      principals {
-        type = "AWS"
-
-        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
-      }
-
-      actions = local.actions.lambda_access
-    }
-  }
-
-  dynamic "statement" {
-    for_each = var.organizations_readonly_access
-
-    content {
-      sid     = "OrganizationReadonlyAccess_${statement.value}"
-      effect  = "Allow"
-      actions = local.actions.read_only
-
-      principals {
-        identifiers = ["*"]
-        type        = "*"
-      }
-
-      condition {
-        test     = "StringEquals"
-        values   = [statement.value]
-        variable = "aws:PrincipalOrgID"
-      }
-    }
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:ListTagsForResource",
+    ]
   }
 }
 
@@ -207,12 +135,18 @@ data "aws_iam_policy_document" "resource_push_access" {
     effect = "Allow"
 
     principals {
-      type = "AWS"
-
+      type        = "AWS"
       identifiers = var.principals_push_access
     }
 
-    actions = local.actions.push_access
+    actions = [
+      "ecr:CompleteLayerUpload",
+      "ecr:GetAuthorizationToken",
+      "ecr:UploadLayerPart",
+      "ecr:InitiateLayerUpload",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+    ]
   }
 }
 
@@ -224,84 +158,147 @@ data "aws_iam_policy_document" "resource_full_access" {
     effect = "Allow"
 
     principals {
-      type = "AWS"
-
+      type        = "AWS"
       identifiers = var.principals_full_access
     }
 
-    actions = local.actions.full_access
+    actions = ["ecr:*"]
   }
+}
 
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
+data "aws_iam_policy_document" "lambda_access" {
+  count = module.this.enabled && length(var.principals_lambda) > 0 ? 1 : 0
 
-    content {
-      sid     = "LambdaECRImageCrossAccountRetrievalPolicy"
-      effect  = "Allow"
-      actions = local.actions.lambda_access
+  statement {
+    sid     = "LambdaECRImageCrossAccountRetrievalPolicy"
+    effect  = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
 
-      principals {
-        type        = "Service"
-        identifiers = ["lambda.amazonaws.com"]
-      }
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
 
-      condition {
-        test     = "StringLike"
-        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
-        variable = "aws:sourceArn"
-      }
+    condition {
+      test     = "StringLike"
+      values   = local.principals_lambda_non_empty ? formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda) : []
+      variable = "aws:SourceArn"
     }
   }
 
-  dynamic "statement" {
-    for_each = length(var.principals_lambda) > 0 ? [1] : []
-    content {
-      sid    = "CrossAccountPermission"
-      effect = "Allow"
+  statement {
+    sid     = "CrossAccountPermission"
+    effect  = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
 
-      principals {
-        type = "AWS"
-
-        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
-      }
-
-      actions = local.actions.lambda_access
+    principals {
+      type        = "AWS"
+      identifiers = local.principals_lambda_non_empty ? formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda) : []
     }
   }
+}
 
-  dynamic "statement" {
-    for_each = var.organizations_full_access
+data "aws_iam_policy_document" "organizations_readonly_access" {
+  count = module.this.enabled && length(var.organizations_readonly_access) > 0 ? 1 : 0
 
-    content {
-      sid     = "OrganizationFullAccess_${statement.value}"
-      effect  = "Allow"
-      actions = local.actions.full_access
+  statement {
+    sid    = "ReadonlyAccess"
+    effect = "Allow"
 
-      principals {
-        identifiers = ["*"]
-        type        = "*"
-      }
-
-      condition {
-        test     = "StringEquals"
-        values   = [statement.value]
-        variable = "aws:PrincipalOrgID"
-      }
+    principals {
+      identifiers = ["*"]
+      type        = "*"
     }
+
+    condition {
+      test     = "StringEquals"
+      values   = [var.organizations_readonly_access]
+      variable = "aws:PrincipalOrgID"
+    }
+
+    actions = [
+      "ecr:CompleteLayerUpload",
+      "ecr:GetAuthorizationToken",
+      "ecr:UploadLayerPart",
+      "ecr:InitiateLayerUpload",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "organization_full_access" {
+  count = module.this.enabled && length(var.organizations_full_access) > 0 ? 1 : 0
+
+  statement {
+    sid    = "ReadonlyAccess"
+    effect = "Allow"
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = [var.organizations_readonly_access]
+      variable = "aws:PrincipalOrgID"
+    }
+
+    actions = [
+      "ecr:*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "organization_push_access" {
+  count = module.this.enabled && length(var.organizations_push_access) > 0 ? 1 : 0
+
+  statement {
+    sid    = "ReadonlyAccess"
+    effect = "Allow"
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = [var.organizations_push_access]
+      variable = "aws:PrincipalOrgID"
+    }
+
+    actions = [
+      "ecr:*",
+    ]
   }
 }
 
 data "aws_iam_policy_document" "resource" {
   count                   = module.this.enabled ? 1 : 0
-  source_policy_documents = local.principals_readonly_access_non_empty || local.organizations_readonly_access_non_empty ? [data.aws_iam_policy_document.resource_readonly_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
+  source_policy_documents = local.principals_readonly_access_non_empty ? [
+    data.aws_iam_policy_document.resource_readonly_access[0].json
+  ] : local.organizations_readonly_access_non_empty ? [
+    data.aws_iam_policy_document.organizations_readonly_access[0].json
+  ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.principals_full_access_non_empty || local.organizations_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
   ])
 }
 
 resource "aws_ecr_repository_policy" "name" {
   for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
-  policy     = join("", data.aws_iam_policy_document.resource.*.json)
+  policy     = join("", data.aws_iam_policy_document.resource[*].json)
 }

@@ -89,3 +89,9 @@ variable "organizations_full_access" {
   description = "Organization IDs to provide with full access to the ECR."
   default     = []
 }
+
+variable "organizations_push_access" {
+  type        = list(string)
+  description = "Organization IDs to provide with push access to the ECR"
+  default     = []
+}

@@ -208,7 +208,7 @@ data "aws_iam_policy_document" "organizations_readonly_access" {
   count = module.this.enabled && length(var.organizations_readonly_access) > 0 ? 1 : 0
 
   statement {
-    sid    = "ReadonlyAccess"
+    sid    = "OrganizationsReadonlyAccess"
     effect = "Allow"
 
     principals {
@@ -218,7 +218,7 @@ data "aws_iam_policy_document" "organizations_readonly_access" {
 
     condition {
       test     = "StringEquals"
-      values   = [var.organizations_readonly_access]
+      values   = var.organizations_readonly_access
       variable = "aws:PrincipalOrgID"
     }
 
@@ -242,7 +242,7 @@ data "aws_iam_policy_document" "organization_full_access" {
   count = module.this.enabled && length(var.organizations_full_access) > 0 ? 1 : 0
 
   statement {
-    sid    = "ReadonlyAccess"
+    sid    = "OrganizationsFullAccess"
     effect = "Allow"
 
     principals {
@@ -252,7 +252,7 @@ data "aws_iam_policy_document" "organization_full_access" {
 
     condition {
       test     = "StringEquals"
-      values   = [var.organizations_readonly_access]
+      values   = var.organizations_readonly_access
       variable = "aws:PrincipalOrgID"
     }
 
@@ -266,7 +266,7 @@ data "aws_iam_policy_document" "organization_push_access" {
   count = module.this.enabled && length(var.organizations_push_access) > 0 ? 1 : 0
 
   statement {
-    sid    = "ReadonlyAccess"
+    sid    = "OrganizationsPushAccess"
     effect = "Allow"
 
     principals {
@@ -276,7 +276,7 @@ data "aws_iam_policy_document" "organization_push_access" {
 
     condition {
       test     = "StringEquals"
-      values   = [var.organizations_push_access]
+      values   = var.organizations_push_access
       variable = "aws:PrincipalOrgID"
     }
 
@@ -295,14 +295,13 @@ data "aws_iam_policy_document" "resource" {
   count = module.this.enabled ? 1 : 0
   source_policy_documents = local.principals_readonly_access_non_empty ? [
     data.aws_iam_policy_document.resource_readonly_access[0].json
-    ] : local.organizations_readonly_access_non_empty ? [
-    data.aws_iam_policy_document.organizations_readonly_access[0].json
   ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_readonly_access_non_empty ? data.aws_iam_policy_document.organizations_readonly_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
   ])
 }

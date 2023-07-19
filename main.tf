@@ -252,7 +252,7 @@ data "aws_iam_policy_document" "organization_full_access" {
 
     condition {
       test     = "StringEquals"
-      values   = var.organizations_readonly_access
+      values   = var.organizations_full_access
       variable = "aws:PrincipalOrgID"
     }
 

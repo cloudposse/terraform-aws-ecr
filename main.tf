@@ -181,20 +181,6 @@ data "aws_iam_policy_document" "lambda_access" {
       variable = "aws:SourceArn"
     }
   }
-
-  statement {
-    sid    = "CrossAccountPermission"
-    effect = "Allow"
-    actions = [
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer"
-    ]
-
-    principals {
-      type        = "AWS"
-      identifiers = local.principals_lambda_non_empty ? formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda) : []
-    }
-  }
 }
 
 data "aws_iam_policy_document" "resource" {

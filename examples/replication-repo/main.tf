@@ -13,7 +13,7 @@ module "ecr" {
   image_names  = ["redis"]
 
   enable_registry_replication = true
-  replication_configuration_rules = [
+  replication_configuration = [
     {
       destinations = [
         {

@@ -214,7 +214,7 @@ resource "aws_ecr_repository_policy" "name" {
 }
 
 resource "aws_ecr_replication_configuration" "replication_configuration" {
-  count = module.this.enabled && var.enable_registry_replication ? 1 : 0
+  count = module.this.enabled && length(var.replication_configuration_rules) > 0 ? 1 : 0
   replication_configuration {
     dynamic "rule" {
       for_each = var.replication_configuration_rules

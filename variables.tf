@@ -79,14 +79,19 @@ variable "force_delete" {
   default     = false
 }
 
-variable "enable_registry_replication" {
-  type        = bool
-  description = "Set to 'true' to enable registry replication"
-  default     = false
-}
-
 variable "replication_configuration_rules" {
   description = "The replication rules for a replication configuration. A maximum of 10 are allowed per"
-  type        = any
-  default     = []
+  type = list(object({
+    rule = list(object({
+      destination = list(object({
+        region      = string
+        registry_id = string
+      })),
+      repository_filter = list(object({
+        filter      = string
+        filter_type = string
+      }))
+    }))
+  }))
+  default = []
 }

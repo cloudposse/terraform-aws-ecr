@@ -82,15 +82,13 @@ variable "force_delete" {
 variable "replication_configuration_rules" {
   description = "The replication rules for a replication configuration. A maximum of 10 are allowed per"
   type = list(object({
-    rule = list(object({
-      destination = list(object({
-        region      = string
-        registry_id = string
-      })),
-      repository_filter = list(object({
-        filter      = string
-        filter_type = string
-      }))
+    destinations = list(object({
+      region      = string
+      registry_id = string
+    }))
+    repository_filters = list(object({
+      filter      = string
+      filter_type = string
     }))
   }))
   default = []

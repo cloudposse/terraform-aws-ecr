@@ -160,7 +160,7 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.22.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.22.0 |
 
 ## Modules
 
@@ -214,7 +214,7 @@ Available targets:
 | <a name="input_principals_readonly_access"></a> [principals\_readonly\_access](#input\_principals\_readonly\_access) | Principal ARNs to provide with readonly access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_protected_tags"></a> [protected\_tags](#input\_protected\_tags) | Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod` | `set(string)` | `[]` | no |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br>Characters matching the regex will be removed from the ID elements.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
-| <a name="input_replication_configuration_rules"></a> [replication\_configuration\_rules](#input\_replication\_configuration\_rules) | The replication rules for a replication configuration. A maximum of 10 are allowed per | <pre>list(object({<br>    rule = list(object({<br>      destination = list(object({<br>        region      = string<br>        registry_id = string<br>      })),<br>      repository_filter = list(object({<br>        filter      = string<br>        filter_type = string<br>      }))<br>    }))<br>  }))</pre> | `[]` | no |
+| <a name="input_replication_configuration_rules"></a> [replication\_configuration\_rules](#input\_replication\_configuration\_rules) | The replication rules for a replication configuration. A maximum of 10 are allowed per | <pre>list(object({<br>    destinations = list(object({<br>      region      = string<br>      registry_id = string<br>    }))<br>    repository_filters = list(object({<br>      filter      = string<br>      filter_type = string<br>    }))<br>  }))</pre> | `[]` | no |
 | <a name="input_scan_images_on_push"></a> [scan\_images\_on\_push](#input\_scan\_images\_on\_push) | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | `bool` | `true` | no |
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |

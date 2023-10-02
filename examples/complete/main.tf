@@ -9,3 +9,18 @@ module "ecr" {
 
   context = module.this.context
 }
+
+module "scan_config" {
+  source = "../../modules/scanning_configuration"
+  scan_config = {
+    scan_type = "ENHANCED"
+    rules = [{
+      scan_frequency = "MANUAL"
+      repository_filter = {
+        filter = "*"
+      }
+    }]
+  }
+  
+  context = module.this.context
+}

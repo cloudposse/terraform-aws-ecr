@@ -78,3 +78,15 @@ variable "force_delete" {
   description = "Whether to delete the repository even if it contains images"
   default     = false
 }
+
+variable "replication_regions" {
+  type        = set(string)
+  default     = []
+  description = "List of destination regions in the same account for which to replicate ECR images to."
+}
+
+variable "only_repository_policy" {
+  type        = bool
+  description = "Whether to skip creating repositories and only modify the policy for existing repositories"
+  default     = false
+}

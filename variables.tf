@@ -82,11 +82,11 @@ variable "force_delete" {
 variable "replication_regions" {
   type        = set(string)
   default     = []
-  description = "List of destination regions in the same account for which to replicate ECR images to."
+  description = "List of destination regions in the same account for which to replicate ECR images to"
 }
 
-variable "only_repository_policy" {
+variable "repository_creation_enabled" {
   type        = bool
-  description = "Whether to skip creating repositories and only modify the policy for existing repositories"
-  default     = false
+  description = "Whether ECR repositories should be created"
+  default     = true
 }

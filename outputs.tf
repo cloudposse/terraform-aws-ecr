@@ -1,25 +1,25 @@
 output "registry_id" {
-  value       = module.this.enabled && !var.only_repository_policy ? aws_ecr_repository.name[local.image_names[0]].registry_id : ""
+  value       = local.repository_creation_enabled ? aws_ecr_repository.name[local.image_names[0]].registry_id : ""
   description = "Registry ID"
 }
 
 output "repository_name" {
-  value       = module.this.enabled && !var.only_repository_policy ? aws_ecr_repository.name[local.image_names[0]].name : ""
+  value       = local.repository_creation_enabled ? aws_ecr_repository.name[local.image_names[0]].name : ""
   description = "Name of first repository created"
 }
 
 output "repository_url" {
-  value       = module.this.enabled && !var.only_repository_policy ? aws_ecr_repository.name[local.image_names[0]].repository_url : ""
+  value       = local.repository_creation_enabled ? aws_ecr_repository.name[local.image_names[0]].repository_url : ""
   description = "URL of first repository created"
 }
 
 output "repository_arn" {
-  value       = module.this.enabled && !var.only_repository_policy ? aws_ecr_repository.name[local.image_names[0]].arn : ""
+  value       = local.repository_creation_enabled ? aws_ecr_repository.name[local.image_names[0]].arn : ""
   description = "ARN of first repository created"
 }
 
 output "repository_url_map" {
-  value = module.this.enabled && !var.only_repository_policy ? zipmap(
+  value = local.repository_creation_enabled ? zipmap(
     values(aws_ecr_repository.name)[*].name,
     values(aws_ecr_repository.name)[*].repository_url
   ) : {}
@@ -27,7 +27,7 @@ output "repository_url_map" {
 }
 
 output "repository_arn_map" {
-  value = module.this.enabled && !var.only_repository_policy ? zipmap(
+  value = local.repository_creation_enabled ? zipmap(
     values(aws_ecr_repository.name)[*].name,
     values(aws_ecr_repository.name)[*].arn
   ) : {}

@@ -9,10 +9,11 @@ locals {
 locals {
   _name       = var.use_fullname ? module.this.id : module.this.name
   image_names = length(var.image_names) > 0 ? var.image_names : [local._name]
+  repository_creation_enabled = module.this.enabled && var.repository_creation_enabled
 }
 
 resource "aws_ecr_repository" "name" {
-  for_each             = toset(module.this.enabled && !var.only_repository_policy ? local.image_names : [])
+  for_each             = toset(local.repository_creation_enabled ? local.image_names : [])
   name                 = each.value
   image_tag_mutability = var.image_tag_mutability
   force_delete         = var.force_delete
@@ -78,7 +79,7 @@ locals {
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
-  for_each   = toset(module.this.enabled && var.enable_lifecycle_policy && !var.only_repository_policy ? local.image_names : [])
+  for_each   = toset(local.repository_creation_enabled && var.enable_lifecycle_policy ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
 
   policy = jsonencode({
@@ -208,13 +209,7 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "name" {
-  for_each   = toset(local.ecr_need_policy && module.this.enabled && !var.only_repository_policy ? local.image_names : [])
-  repository = aws_ecr_repository.name[each.value].name
-  policy     = join("", data.aws_iam_policy_document.resource[*].json)
-}
-
-resource "aws_ecr_repository_policy" "permissions_only_name" {
-  for_each   = toset(local.ecr_need_policy && module.this.enabled && var.only_repository_policy ? local.image_names : [])
+  for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
   repository = each.value
   policy     = join("", data.aws_iam_policy_document.resource[*].json)
 }
@@ -222,7 +217,7 @@ resource "aws_ecr_repository_policy" "permissions_only_name" {
 data "aws_caller_identity" "current" {}
 
 resource "aws_ecr_replication_configuration" "same_account_cross_region" {
-  count = module.this.enabled && length(var.replication_regions) > 0 && !var.only_repository_policy ? 1 : 0
+  count = local.repository_creation_enabled && length(var.replication_regions) > 0 ? 1 : 0
 
   replication_configuration {
     dynamic "rule" {

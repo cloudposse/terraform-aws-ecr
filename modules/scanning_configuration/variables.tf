@@ -7,7 +7,7 @@ variable "scan_config" {
       scan_frequency = string
       repository_filter = list(object({
         filter      = string
-        filter_type = option(string, "WILDCARD")
+        filter_type = optional(string, "WILDCARD")
       }))
     }))
   }))

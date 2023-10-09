@@ -21,6 +21,6 @@ module "scan_config" {
       }
     }]
   }
-  
+
   context = module.this.context
 }

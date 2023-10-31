@@ -27,6 +27,9 @@
 | [aws_ecr_repository_policy.name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository_policy) | resource |
 | [aws_iam_policy_document.empty](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.lambda_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.organization_full_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.organization_push_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.organizations_readonly_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource_full_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource_push_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -57,6 +60,9 @@
 | <a name="input_max_image_count"></a> [max\_image\_count](#input\_max\_image\_count) | How many Docker Image versions AWS ECR will store | `number` | `500` | no |
 | <a name="input_name"></a> [name](#input\_name) | ID element. Usually the component or solution name, e.g. 'app' or 'jenkins'.<br>This is the only ID element not also included as a `tag`.<br>The "name" tag is set to the full `id` string. There is no tag with the value of the `name` input. | `string` | `null` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | ID element. Usually an abbreviation of your organization name, e.g. 'eg' or 'cp', to help ensure generated IDs are globally unique | `string` | `null` | no |
+| <a name="input_organizations_full_access"></a> [organizations\_full\_access](#input\_organizations\_full\_access) | Organization IDs to provide with full access to the ECR. | `list(string)` | `[]` | no |
+| <a name="input_organizations_push_access"></a> [organizations\_push\_access](#input\_organizations\_push\_access) | Organization IDs to provide with push access to the ECR | `list(string)` | `[]` | no |
+| <a name="input_organizations_readonly_access"></a> [organizations\_readonly\_access](#input\_organizations\_readonly\_access) | Organization IDs to provide with readonly access to the ECR. | `list(string)` | `[]` | no |
 | <a name="input_principals_full_access"></a> [principals\_full\_access](#input\_principals\_full\_access) | Principal ARNs to provide with full access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_lambda"></a> [principals\_lambda](#input\_principals\_lambda) | Principal account IDs of Lambdas allowed to consume ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_push_access"></a> [principals\_push\_access](#input\_principals\_push\_access) | Principal ARNs to provide with push access to the ECR | `list(string)` | `[]` | no |

@@ -1,9 +1,12 @@
 locals {
-  principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0
-  principals_push_access_non_empty     = length(var.principals_push_access) > 0
-  principals_full_access_non_empty     = length(var.principals_full_access) > 0
-  principals_lambda_non_empty          = length(var.principals_lambda) > 0
-  ecr_need_policy                      = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) + length(var.principals_lambda) > 0
+  principals_readonly_access_non_empty    = length(var.principals_readonly_access) > 0
+  principals_push_access_non_empty        = length(var.principals_push_access) > 0
+  principals_full_access_non_empty        = length(var.principals_full_access) > 0
+  principals_lambda_non_empty             = length(var.principals_lambda) > 0
+  organizations_readonly_access_non_empty = length(var.organizations_readonly_access) > 0
+  organizations_full_access_non_empty     = length(var.organizations_full_access) > 0
+  organizations_push_non_empty            = length(var.organizations_push_access) > 0
+  ecr_need_policy                         = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) + length(var.principals_lambda) + length(var.organizations_readonly_access) + length(var.organizations_full_access) + length(var.organizations_push_access) > 0
 }
 
 locals {
@@ -33,31 +36,35 @@ resource "aws_ecr_repository" "name" {
 }
 
 locals {
-  untagged_image_rule = [{
-    rulePriority = length(var.protected_tags) + 1
-    description  = "Remove untagged images"
-    selection = {
-      tagStatus   = "untagged"
-      countType   = "imageCountMoreThan"
-      countNumber = 1
+  untagged_image_rule = [
+    {
+      rulePriority = length(var.protected_tags) + 1
+      description  = "Remove untagged images"
+      selection = {
+        tagStatus   = "untagged"
+        countType   = "imageCountMoreThan"
+        countNumber = 1
+      }
+      action = {
+        type = "expire"
+      }
     }
-    action = {
-      type = "expire"
-    }
-  }]
+  ]
 
-  remove_old_image_rule = [{
-    rulePriority = length(var.protected_tags) + 2
-    description  = "Rotate images when reach ${var.max_image_count} images stored",
-    selection = {
-      tagStatus   = "any"
-      countType   = "imageCountMoreThan"
-      countNumber = var.max_image_count
+  remove_old_image_rule = [
+    {
+      rulePriority = length(var.protected_tags) + 2
+      description  = "Rotate images when reach ${var.max_image_count} images stored",
+      selection = {
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = var.max_image_count
+      }
+      action = {
+        type = "expire"
+      }
     }
-    action = {
-      type = "expire"
-    }
-  }]
+  ]
 
   protected_tag_rules = [
     for index, tagPrefix in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
@@ -197,13 +204,105 @@ data "aws_iam_policy_document" "lambda_access" {
   }
 }
 
+data "aws_iam_policy_document" "organizations_readonly_access" {
+  count = module.this.enabled && length(var.organizations_readonly_access) > 0 ? 1 : 0
+
+  statement {
+    sid    = "OrganizationsReadonlyAccess"
+    effect = "Allow"
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = var.organizations_readonly_access
+      variable = "aws:PrincipalOrgID"
+    }
+
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:ListTagsForResource",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "organization_full_access" {
+  count = module.this.enabled && length(var.organizations_full_access) > 0 ? 1 : 0
+
+  statement {
+    sid    = "OrganizationsFullAccess"
+    effect = "Allow"
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = var.organizations_full_access
+      variable = "aws:PrincipalOrgID"
+    }
+
+    actions = [
+      "ecr:*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "organization_push_access" {
+  count = module.this.enabled && length(var.organizations_push_access) > 0 ? 1 : 0
+
+  statement {
+    sid    = "OrganizationsPushAccess"
+    effect = "Allow"
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "StringEquals"
+      values   = var.organizations_push_access
+      variable = "aws:PrincipalOrgID"
+    }
+
+    actions = [
+      "ecr:CompleteLayerUpload",
+      "ecr:GetAuthorizationToken",
+      "ecr:UploadLayerPart",
+      "ecr:InitiateLayerUpload",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "resource" {
-  count                   = module.this.enabled ? 1 : 0
-  source_policy_documents = local.principals_readonly_access_non_empty ? [data.aws_iam_policy_document.resource_readonly_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
+  count = module.this.enabled ? 1 : 0
+  source_policy_documents = local.principals_readonly_access_non_empty ? [
+    data.aws_iam_policy_document.resource_readonly_access[0].json
+  ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_readonly_access_non_empty ? data.aws_iam_policy_document.organizations_readonly_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
   ])
 }
 

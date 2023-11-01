@@ -1,6 +1,6 @@
 
 resource "aws_ecr_registry_scanning_configuration" "default" {
-  count     = var.enabled && var.scan_config != null ? 1 : 0
+  count     = module.this.enabled && var.scan_config != null ? 1 : 0
   scan_type = var.scan_config.scan_type
 
   dynamic "rule" {

@@ -78,3 +78,20 @@ variable "force_delete" {
   description = "Whether to delete the repository even if it contains images"
   default     = false
 }
+variable "organizations_readonly_access" {
+  type        = list(string)
+  description = "Organization IDs to provide with readonly access to the ECR."
+  default     = []
+}
+
+variable "organizations_full_access" {
+  type        = list(string)
+  description = "Organization IDs to provide with full access to the ECR."
+  default     = []
+}
+
+variable "organizations_push_access" {
+  type        = list(string)
+  description = "Organization IDs to provide with push access to the ECR"
+  default     = []
+}

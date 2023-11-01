@@ -8,7 +8,7 @@ resource "aws_ecr_registry_scanning_configuration" "default" {
     content {
       scan_frequency = rule.value.scan_frequency
       dynamic "repository_filter" {
-        for_each = [rule.value.repository_filter]
+        for_each = rule.value.repository_filter
         content {
           filter      = repository_filter.value.filter
           filter_type = repository_filter.value.filter_type

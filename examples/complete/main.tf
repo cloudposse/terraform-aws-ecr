@@ -16,9 +16,9 @@ module "scan_config" {
     scan_type = "ENHANCED"
     rules = [{
       scan_frequency = "MANUAL"
-      repository_filter = {
+      repository_filter = [{
         filter = "*"
-      }
+      }]
     }]
   }
 

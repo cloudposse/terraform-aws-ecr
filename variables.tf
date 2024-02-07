@@ -22,6 +22,12 @@ variable "principals_readonly_access" {
   default     = []
 }
 
+variable "principals_pull_though_access" {
+  type        = list(string)
+  description = "Principal ARNs to provide with pull though access to the ECR"
+  default     = []
+}
+
 variable "principals_lambda" {
   type        = list(string)
   description = "Principal account IDs of Lambdas allowed to consume ECR"

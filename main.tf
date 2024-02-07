@@ -1,12 +1,23 @@
 locals {
-  principals_readonly_access_non_empty    = length(var.principals_readonly_access) > 0
-  principals_push_access_non_empty        = length(var.principals_push_access) > 0
-  principals_full_access_non_empty        = length(var.principals_full_access) > 0
-  principals_lambda_non_empty             = length(var.principals_lambda) > 0
-  organizations_readonly_access_non_empty = length(var.organizations_readonly_access) > 0
-  organizations_full_access_non_empty     = length(var.organizations_full_access) > 0
-  organizations_push_non_empty            = length(var.organizations_push_access) > 0
-  ecr_need_policy                         = length(var.principals_full_access) + length(var.principals_readonly_access) + length(var.principals_push_access) + length(var.principals_lambda) + length(var.organizations_readonly_access) + length(var.organizations_full_access) + length(var.organizations_push_access) > 0
+  principals_readonly_access_non_empty     = length(var.principals_readonly_access) > 0
+  principals_pull_through_access_non_empty = length(var.principals_pull_though_access) > 0
+  principals_push_access_non_empty         = length(var.principals_push_access) > 0
+  principals_full_access_non_empty         = length(var.principals_full_access) > 0
+  principals_lambda_non_empty              = length(var.principals_lambda) > 0
+  organizations_readonly_access_non_empty  = length(var.organizations_readonly_access) > 0
+  organizations_full_access_non_empty      = length(var.organizations_full_access) > 0
+  organizations_push_non_empty             = length(var.organizations_push_access) > 0
+
+  ecr_need_policy = (
+    length(var.principals_full_access)
+    + length(var.principals_readonly_access)
+    + length(var.principals_pull_though_access)
+    + length(var.principals_push_access)
+    + length(var.principals_lambda)
+    + length(var.organizations_readonly_access)
+    + length(var.organizations_full_access)
+    + length(var.organizations_push_access) > 0
+  )
 }
 
 locals {
@@ -114,7 +125,6 @@ data "aws_iam_policy_document" "resource_readonly_access" {
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetImage",
-      "ecr:BatchImportUpstreamImage",
       "ecr:DescribeImageScanFindings",
       "ecr:DescribeImages",
       "ecr:DescribeRepositories",
@@ -124,6 +134,25 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       "ecr:GetRepositoryPolicy",
       "ecr:ListImages",
       "ecr:ListTagsForResource",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "resource_pull_through_cache" {
+  count = module.this.enabled ? 1 : 0
+
+  statement {
+    sid    = "ReadonlyAccess"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = var.principals_pull_though_access
+    }
+
+    actions = [
+      "ecr:BatchImportUpstreamImage",
+      "ecr:TagResource"
     ]
   }
 }
@@ -298,6 +327,7 @@ data "aws_iam_policy_document" "resource" {
     data.aws_iam_policy_document.resource_readonly_access[0].json
   ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
+    local.principals_pull_through_access_non_empty ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,

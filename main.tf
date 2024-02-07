@@ -114,6 +114,7 @@ data "aws_iam_policy_document" "resource_readonly_access" {
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetImage",
+      "ecr:BatchImportUpstreamImage",
       "ecr:DescribeImageScanFindings",
       "ecr:DescribeImages",
       "ecr:DescribeRepositories",

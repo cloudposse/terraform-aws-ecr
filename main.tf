@@ -142,7 +142,7 @@ data "aws_iam_policy_document" "resource_pull_through_cache" {
   count = module.this.enabled ? 1 : 0
 
   statement {
-    sid    = "ReadonlyAccess"
+    sid    = "PullThroughAccess"
     effect = "Allow"
 
     principals {
@@ -327,7 +327,7 @@ data "aws_iam_policy_document" "resource" {
     data.aws_iam_policy_document.resource_readonly_access[0].json
   ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
-    local.principals_pull_through_access_non_empty && contains(var.var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9/-/./_]+", value.key)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", each.value)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
@@ -340,5 +340,5 @@ data "aws_iam_policy_document" "resource" {
 resource "aws_ecr_repository_policy" "name" {
   for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
-  policy     = join("", data.aws_iam_policy_document.resource[each.value].json)
+  policy     = data.aws_iam_policy_document.resource[each.value].json
 }

@@ -101,3 +101,9 @@ variable "organizations_push_access" {
   description = "Organization IDs to provide with push access to the ECR"
   default     = []
 }
+
+variable "prefixes_pull_through_repositories" {
+  type        = list(string)
+  description = "Organization IDs to provide with push access to the ECR"
+  default     = []
+}

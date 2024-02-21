@@ -32,6 +32,7 @@
 | [aws_iam_policy_document.organizations_readonly_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource_full_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.resource_pull_through_cache](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource_push_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.resource_readonly_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
@@ -63,8 +64,10 @@
 | <a name="input_organizations_full_access"></a> [organizations\_full\_access](#input\_organizations\_full\_access) | Organization IDs to provide with full access to the ECR. | `list(string)` | `[]` | no |
 | <a name="input_organizations_push_access"></a> [organizations\_push\_access](#input\_organizations\_push\_access) | Organization IDs to provide with push access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_organizations_readonly_access"></a> [organizations\_readonly\_access](#input\_organizations\_readonly\_access) | Organization IDs to provide with readonly access to the ECR. | `list(string)` | `[]` | no |
+| <a name="input_prefixes_pull_through_repositories"></a> [prefixes\_pull\_through\_repositories](#input\_prefixes\_pull\_through\_repositories) | Organization IDs to provide with push access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_full_access"></a> [principals\_full\_access](#input\_principals\_full\_access) | Principal ARNs to provide with full access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_lambda"></a> [principals\_lambda](#input\_principals\_lambda) | Principal account IDs of Lambdas allowed to consume ECR | `list(string)` | `[]` | no |
+| <a name="input_principals_pull_though_access"></a> [principals\_pull\_though\_access](#input\_principals\_pull\_though\_access) | Principal ARNs to provide with pull though access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_push_access"></a> [principals\_push\_access](#input\_principals\_push\_access) | Principal ARNs to provide with push access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_readonly_access"></a> [principals\_readonly\_access](#input\_principals\_readonly\_access) | Principal ARNs to provide with readonly access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_protected_tags"></a> [protected\_tags](#input\_protected\_tags) | Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod` | `set(string)` | `[]` | no |

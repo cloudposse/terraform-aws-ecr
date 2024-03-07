@@ -12,22 +12,26 @@ module "ecr" {
   use_fullname = false
   image_names  = ["redis"]
 
-  replication_configuration_rules = [
+  replication_configurations = [
     {
-      destinations = [
+      rules = [
         {
-          region      = "us-east-1"
-          registry_id = data.aws_caller_identity.current.account_id
-        },
-        {
-          region      = "eu-west-1"
-          registry_id = data.aws_caller_identity.current.account_id
-        }
-      ]
-      repository_filters = [
-        {
-          filter      = "redis"
-          filter_type = "PREFIX_MATCH"
+          destinations = [
+            {
+              region      = "us-east-1"
+              registry_id = data.aws_caller_identity.current.account_id
+            },
+            {
+              region      = "eu-west-1"
+              registry_id = data.aws_caller_identity.current.account_id
+            }
+          ]
+          repository_filters = [
+            {
+              filter      = "redis"
+              filter_type = "PREFIX_MATCH"
+            }
+          ]
         }
       ]
     }

@@ -84,6 +84,24 @@ variable "force_delete" {
   description = "Whether to delete the repository even if it contains images"
   default     = false
 }
+
+variable "replication_configurations" {
+  description = "Replication configuration for a registry. See [Replication Configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_replication_configuration#replication-configuration)."
+  type = list(object({
+    rules = list(object({          # Maximum 10
+      destinations = list(object({ # Maximum 25
+        region      = string
+        registry_id = string
+      }))
+      repository_filters = list(object({
+        filter      = string
+        filter_type = string
+      }))
+    }))
+  }))
+  default = []
+}
+
 variable "organizations_readonly_access" {
   type        = list(string)
   description = "Organization IDs to provide with readonly access to the ECR."

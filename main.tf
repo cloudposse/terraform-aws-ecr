@@ -342,3 +342,31 @@ resource "aws_ecr_repository_policy" "name" {
   repository = aws_ecr_repository.name[each.value].name
   policy     = data.aws_iam_policy_document.resource[each.value].json
 }
+
+resource "aws_ecr_replication_configuration" "replication_configuration" {
+  count = module.this.enabled && length(var.replication_configurations) > 0 ? 1 : 0
+  dynamic "replication_configuration" {
+    for_each = var.replication_configurations
+    content {
+      dynamic "rule" {
+        for_each = replication_configuration.value.rules
+        content {
+          dynamic "destination" {
+            for_each = rule.value.destinations
+            content {
+              region      = destination.value.region
+              registry_id = destination.value.registry_id
+            }
+          }
+          dynamic "repository_filter" {
+            for_each = rule.value.repository_filters
+            content {
+              filter      = repository_filter.value.filter
+              filter_type = repository_filter.value.filter_type
+            }
+          }
+        }
+      }
+    }
+  }
+}

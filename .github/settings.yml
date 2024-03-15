@@ -1,0 +1,7 @@
+# Upstream changes from _extends are only recognized when modifications are made to this file in the default branch.
+_extends: .github
+repository:
+  name: terraform-aws-ecr
+  description: Terraform Module to manage Docker Container Registries on AWS ECR
+  homepage: https://cloudposse.com/accelerate
+  topics: terraform, terraform-modules, ecr, aws, docker, docker-registry, hcl2

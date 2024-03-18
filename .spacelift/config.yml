@@ -1,7 +1,7 @@
 # The version of the configuration file format
 version: 1
 # Your module version - must be changed to release a new version
-module_version: 0.1.0
+module_version: 1.0.0
 
 tests: []
 

@@ -1,4 +1,4 @@
-locals {
+ locals {
   principals_readonly_access_non_empty = length(var.principals_readonly_access) > 0
   principals_push_access_non_empty     = length(var.principals_push_access) > 0
   principals_full_access_non_empty     = length(var.principals_full_access) > 0
@@ -8,15 +8,15 @@ locals {
 
 locals {
   _name       = var.use_fullname ? module.this.id : module.this.name
-  image_names = length(var.image_names) > 0 ? var.image_names : [local._name]
+  image_names = length(var.image_names) > 0 ? var.image_names : tomap(local._name)
   repository_creation_enabled = module.this.enabled && var.repository_creation_enabled
 }
 
 resource "aws_ecr_repository" "name" {
-  for_each             = toset(local.repository_creation_enabled ? local.image_names : [])
-  name                 = each.value
+  for_each             = local.repository_creation_enabled ? local.image_names : {}
+  name                 = each.key
   image_tag_mutability = var.image_tag_mutability
-  force_delete         = var.force_delete
+  force_delete         = each.value.force_delete_override
 
   dynamic "encryption_configuration" {
     for_each = var.encryption_configuration == null ? [] : [var.encryption_configuration]
@@ -76,15 +76,51 @@ locals {
       }
     }
   ]
+
+  archive_remove_all_rule = [{
+    rulePriority = 2
+    description  = "Remove all images for archived repos"
+    selection = {
+      tagStatus   = "any"
+      countType   = "imageCountMoreThan"
+      countNumber = 1
+    }
+    action = {
+      type = "expire"
+    }
+  }]
+
+  archive_protected_tag_rules = [
+    
+    {
+      rulePriority = 1
+      description  = "Protects archived repo release images"
+      selection = {
+        tagStatus     = "tagged"
+        tagPrefixList = ["*.*.*"]
+        countType     = "imageCountMoreThan"
+        countNumber   = 999999
+      }
+      action = {
+        type = "expire"
+      }
+    }
+  ]
+
+  lifecycle_policy_default = jsonencode({
+    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
+  })
+
+  lifecycle_policy_archive = jsonencode({
+    rules = concat(local.archive_protected_tag_rules, local.archive_remove_all_rule)
+  })
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
-  for_each   = toset(local.repository_creation_enabled && var.enable_lifecycle_policy ? local.image_names : [])
-  repository = aws_ecr_repository.name[each.value].name
+  for_each   = local.repository_creation_enabled && var.enable_lifecycle_policy ? local.image_names : {}
+  repository = aws_ecr_repository.name[each.key].name
 
-  policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
-  })
+  policy = each.value.archive_enabled ? local.lifecycle_policy_archive : local.lifecycle_policy_default
 }
 
 data "aws_iam_policy_document" "empty" {
@@ -209,8 +245,8 @@ data "aws_iam_policy_document" "resource" {
 }
 
 resource "aws_ecr_repository_policy" "name" {
-  for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
-  repository = each.value
+  for_each   = local.ecr_need_policy && module.this.enabled ? local.image_names : {}
+  repository = each.key
   policy     = join("", data.aws_iam_policy_document.resource[*].json)
 }
 

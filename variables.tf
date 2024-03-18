@@ -41,9 +41,11 @@ variable "max_image_count" {
 }
 
 variable "image_names" {
-  type        = list(string)
-  default     = []
-  description = "List of Docker local image names, used as repository names for AWS ECR "
+  type        = map(object({
+    force_delete_override = optional(bool,false)
+    archive_enabled = optional(bool,false)
+  }))
+  description = "Map of Docker local image names, used as repository names for AWS ECR. Sets `force_delete` option"
 }
 
 variable "image_tag_mutability" {
@@ -71,12 +73,6 @@ variable "encryption_configuration" {
   })
   description = "ECR encryption configuration"
   default     = null
-}
-
-variable "force_delete" {
-  type        = bool
-  description = "Whether to delete the repository even if it contains images"
-  default     = false
 }
 
 variable "replication_regions" {

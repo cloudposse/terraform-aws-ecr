@@ -68,7 +68,7 @@
 | <a name="input_prefixes_pull_through_repositories"></a> [prefixes\_pull\_through\_repositories](#input\_prefixes\_pull\_through\_repositories) | Organization IDs to provide with push access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_full_access"></a> [principals\_full\_access](#input\_principals\_full\_access) | Principal ARNs to provide with full access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_lambda"></a> [principals\_lambda](#input\_principals\_lambda) | Principal account IDs of Lambdas allowed to consume ECR | `list(string)` | `[]` | no |
-| <a name="input_principals_pull_though_access"></a> [principals\_pull\_though\_access](#input\_principals\_pull\_though\_access) | Principal ARNs to provide with pull though access to the ECR | `list(string)` | `[]` | no |
+| <a name="input_principals_pull_through_access"></a> [principals\_pull\_through\_access](#input\_principals\_pull\_through\_access) | Principal ARNs to provide with pull through access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_push_access"></a> [principals\_push\_access](#input\_principals\_push\_access) | Principal ARNs to provide with push access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_principals_readonly_access"></a> [principals\_readonly\_access](#input\_principals\_readonly\_access) | Principal ARNs to provide with readonly access to the ECR | `list(string)` | `[]` | no |
 | <a name="input_protected_tags"></a> [protected\_tags](#input\_protected\_tags) | Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod` | `set(string)` | `[]` | no |

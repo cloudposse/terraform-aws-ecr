@@ -1,6 +1,6 @@
 locals {
   principals_readonly_access_non_empty     = length(var.principals_readonly_access) > 0
-  principals_pull_through_access_non_empty = length(var.principals_pull_though_access) > 0
+  principals_pull_through_access_non_empty = length(var.principals_pull_through_access) > 0
   principals_push_access_non_empty         = length(var.principals_push_access) > 0
   principals_full_access_non_empty         = length(var.principals_full_access) > 0
   principals_lambda_non_empty              = length(var.principals_lambda) > 0
@@ -11,7 +11,7 @@ locals {
   ecr_need_policy = (
     length(var.principals_full_access)
     + length(var.principals_readonly_access)
-    + length(var.principals_pull_though_access)
+    + length(var.principals_pull_through_access)
     + length(var.principals_push_access)
     + length(var.principals_lambda)
     + length(var.organizations_readonly_access)
@@ -147,7 +147,7 @@ data "aws_iam_policy_document" "resource_pull_through_cache" {
 
     principals {
       type        = "AWS"
-      identifiers = var.principals_pull_though_access
+      identifiers = var.principals_pull_through_access
     }
 
     actions = [

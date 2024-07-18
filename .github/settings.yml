@@ -5,3 +5,4 @@ repository:
   description: Terraform Module to manage Docker Container Registries on AWS ECR
   homepage: https://cloudposse.com/accelerate
   topics: terraform, terraform-modules, ecr, aws, docker, docker-registry, hcl2
+

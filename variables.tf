@@ -46,6 +46,12 @@ variable "max_image_count" {
   default     = 500
 }
 
+variable "time_based_rotation" {
+  type        = bool
+  description = "Set 'true' to filter image based on the `sinceImagePushed` count type. `max_image_count` coresponds to number of days before expiration"
+  default     = false
+}
+
 variable "image_names" {
   type        = list(string)
   default     = []

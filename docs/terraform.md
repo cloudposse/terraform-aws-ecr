@@ -78,6 +78,7 @@
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |
 | <a name="input_tenant"></a> [tenant](#input\_tenant) | ID element \_(Rarely used, not included by default)\_. A customer identifier, indicating who this instance of a resource is for | `string` | `null` | no |
+| <a name="input_time_based_rotation"></a> [time\_based\_rotation](#time\_based\_rotation) | Set 'true' to filter image based on the `sinceImagePushed` count type. [max\_image\_count](#input\_max\_image\_count) coresponds to number of days before expiration | `bool` | `false` | no |
 | <a name="input_use_fullname"></a> [use\_fullname](#input\_use\_fullname) | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | `bool` | `true` | no |
 
 ## Outputs

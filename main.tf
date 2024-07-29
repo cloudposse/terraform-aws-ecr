@@ -68,7 +68,7 @@ locals {
       description  = (
         var.time_based_rotation ?
           "Rotate images older than ${var.max_image_count} days" :
-          "Rotate images when reach ${var.max_image_count} images stored",
+          "Rotate images when reach ${var.max_image_count} images stored"
         )
       selection = {
         tagStatus   = "any"

@@ -63,31 +63,36 @@ locals {
   ]
 
   remove_old_image_rule = [
+    var.count_based_rotation ?
     {
       rulePriority = length(var.protected_tags) + 2
-      description  = (
-        var.time_based_rotation ?
-          "Rotate images older than ${var.max_image_count} days" :
-          "Rotate images when reach ${var.max_image_count} images stored"
-        )
+      description  = "Rotate images when reach ${var.max_image_count} images stored"
       selection = {
         tagStatus   = "any"
-        countType   = (
-          var.time_based_rotation ?
-            "sinceImagePushed" :
-            "imageCountMoreThan"
-          )
-        countUnit   = (
-          var.time_based_rotation ?
-            "days" :
-            null
-          )
+        countType   = "imageCountMoreThan"
         countNumber = var.max_image_count
       }
       action = {
         type = "expire"
       }
-    }
+    } : {}
+  ]
+
+  remove_outdated_image_rule = [
+    var.time_based_rotation ?
+    {
+      rulePriority = length(var.protected_tags) + var.count_based_rotation ? 3 : 2
+      description  = "Rotate images when reach ${var.max_days_count} images stored"
+      selection = {
+        tagStatus   = "any"
+        countType   = "sinceImagePushed"
+        countUnit   = "days"
+        countNumber = var.max_days_count
+      }
+      action = {
+        type = "expire"
+      }
+    } : {}
   ]
 
   protected_tag_rules = [
@@ -113,7 +118,7 @@ resource "aws_ecr_lifecycle_policy" "name" {
   repository = aws_ecr_repository.name[each.value].name
 
   policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
+    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule, local.remove_outdated_image_rule)
   })
 }
 

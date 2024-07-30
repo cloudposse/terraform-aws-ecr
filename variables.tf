@@ -40,6 +40,12 @@ variable "scan_images_on_push" {
   default     = true
 }
 
+variable "count_based_rotation" {
+  type        = bool
+  description = "Set true to filter image based on the `imageCountMoreThan` count type."
+  default     = true
+}
+
 variable "max_image_count" {
   type        = number
   description = "How many Docker Image versions AWS ECR will store"
@@ -48,8 +54,14 @@ variable "max_image_count" {
 
 variable "time_based_rotation" {
   type        = bool
-  description = "Set 'true' to filter image based on the `sinceImagePushed` count type. `max_image_count` coresponds to number of days before expiration"
+  description = "Set to true to filter image based on the `sinceImagePushed` count type."
   default     = false
+}
+
+variable "max_days_count" {
+  type        = number
+  description = "How many days Docker Images AWS ECR will store"
+  default     = 180
 }
 
 variable "image_names" {

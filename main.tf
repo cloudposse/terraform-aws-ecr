@@ -63,10 +63,10 @@ locals {
   ]
 
   remove_old_image_rule = [
-    var.count_based_rotation ?
+    for _ in var.count_based_rotation ? [1] : [] :
     {
       rulePriority = length(var.protected_tags) + 2
-      description  = "Rotate images when reach ${var.max_image_count} images stored"
+      description  = "Retain at least ${var.max_image_count} images"
       selection = {
         tagStatus   = "any"
         countType   = "imageCountMoreThan"
@@ -75,14 +75,14 @@ locals {
       action = {
         type = "expire"
       }
-    } : {}
+    }
   ]
 
   remove_outdated_image_rule = [
-    var.time_based_rotation ?
+    for _ in var.time_based_rotation ? [1] : [] :
     {
-      rulePriority = length(var.protected_tags) + var.count_based_rotation ? 3 : 2
-      description  = "Rotate images when reach ${var.max_days_count} images stored"
+      rulePriority = length(var.protected_tags) + (var.count_based_rotation ? 3 : 2)
+      description  = "Retain images less than ${var.max_days_count} days old"
       selection = {
         tagStatus   = "any"
         countType   = "sinceImagePushed"
@@ -92,7 +92,7 @@ locals {
       action = {
         type = "expire"
       }
-    } : {}
+    }
   ]
 
   protected_tag_rules = [

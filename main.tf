@@ -88,23 +88,6 @@ locals {
     }
   ]
 
-  remove_outdated_image_rule = [
-    for _ in var.time_based_rotation ? [1] : [] :
-    {
-      rulePriority = length(var.protected_tags) + (var.count_based_rotation ? 3 : 2)
-      description  = "Retain images less than ${var.max_days_count} days old"
-      selection = {
-        tagStatus   = "any"
-        countType   = "sinceImagePushed"
-        countUnit   = "days"
-        countNumber = var.max_days_count
-      }
-      action = {
-        type = "expire"
-      }
-    }
-  ]
-
   protected_tag_rules = [
     for index, tagPrefix in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
     {

@@ -67,8 +67,8 @@ locals {
       rulePriority = length(var.protected_tags) + 2
       description  = (
           var.time_based_rotation ?
-          "Retain images less than ${var.max_image_count} days old"
-          "Retain at least ${var.max_image_count} images" :
+          "Rotate images older than ${var.max_image_count} days old" :
+          "Rotate images when reach ${var.max_image_count} images stored"
           )
       selection = merge(
         {

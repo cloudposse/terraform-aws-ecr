@@ -63,15 +63,25 @@ locals {
   ]
 
   remove_old_image_rule = [
-    for _ in var.count_based_rotation ? [1] : [] :
     {
       rulePriority = length(var.protected_tags) + 2
-      description  = "Retain at least ${var.max_image_count} images"
-      selection = {
-        tagStatus   = "any"
-        countType   = "imageCountMoreThan"
-        countNumber = var.max_image_count
-      }
+      description  = (
+          var.time_based_rotation ?
+          "Retain at least ${var.max_image_count} images" :
+          "Retain images less than ${var.max_image_count} days old"
+          )
+      selection = merge(
+        {
+          tagStatus   = "any"
+          countType   = (
+            var.time_based_rotation ?
+            "sinceImagePushed" :
+            "imageCountMoreThan"
+          )
+          countNumber = var.max_image_count
+        },
+        var.time_based_rotation ? { countUnit = "days" } : {}
+      )
       action = {
         type = "expire"
       }
@@ -118,7 +128,7 @@ resource "aws_ecr_lifecycle_policy" "name" {
   repository = aws_ecr_repository.name[each.value].name
 
   policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule, local.remove_outdated_image_rule)
+    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
   })
 }
 

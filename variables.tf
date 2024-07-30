@@ -46,6 +46,12 @@ variable "max_image_count" {
   default     = 500
 }
 
+variable "time_based_rotation" {
+  type        = bool
+  description = "Set to true to filter image based on the `sinceImagePushed` count type."
+  default     = false
+}
+
 variable "image_names" {
   type        = list(string)
   default     = []

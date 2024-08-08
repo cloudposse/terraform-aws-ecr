@@ -89,16 +89,18 @@ locals {
   ]
 
   protected_tag_rules = [
-    for index, tagPrefix in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
+    for index, tagPattern in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
     {
       rulePriority = tonumber(index) + 1
-      description  = "Protects images tagged with ${tagPrefix}"
-      selection = {
-        tagStatus     = "tagged"
-        tagPrefixList = [tagPrefix]
-        countType     = "imageCountMoreThan"
-        countNumber   = 999999
-      }
+      description  = "Protects images tagged with ${try(regex("\\Q*\\E", tagPattern), null) == null ? "prefix" : "wildcard"} ${tagPattern}"
+      selection = merge(
+        try(regex("\\Q*\\E", tagPattern), null) == null ? { tagPrefixList = [tagPattern] } : { tagPatternList = [tagPattern] },
+        {
+          tagStatus   = "tagged"
+          countType   = "imageCountMoreThan"
+          countNumber = 999999
+        }
+      )
       action = {
         type = "expire"
       }

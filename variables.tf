@@ -72,7 +72,7 @@ variable "enable_lifecycle_policy" {
 
 variable "protected_tags" {
   type        = set(string)
-  description = "Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod`"
+  description = "List of image tags prefixes and wildcards that should not be destroyed. Useful if you tag images with prefixes like `dev`, `staging`, `prod` or wildcards like `*dev`, `*prod`,`*.*.*`"
   default     = []
 }
 

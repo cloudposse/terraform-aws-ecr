@@ -43,7 +43,7 @@ variable "scan_images_on_push" {
 variable "max_image_count" {
   type        = number
   description = "How many Docker Image versions AWS ECR will store"
-  default     = 500
+  default     = 250
 }
 
 variable "time_based_rotation" {

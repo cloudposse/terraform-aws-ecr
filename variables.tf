@@ -22,9 +22,9 @@ variable "principals_readonly_access" {
   default     = []
 }
 
-variable "principals_pull_though_access" {
+variable "principals_pull_through_access" {
   type        = list(string)
-  description = "Principal ARNs to provide with pull though access to the ECR"
+  description = "Principal ARNs to provide with pull through access to the ECR"
   default     = []
 }
 

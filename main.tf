@@ -98,7 +98,7 @@ locals {
         {
           tagStatus   = "tagged"
           countType   = "imageCountMoreThan"
-          countNumber = 999999
+          countNumber = var.protected_tags_keep_count
         }
       )
       action = {

@@ -76,6 +76,12 @@ variable "protected_tags" {
   default     = []
 }
 
+variable "protected_tags_keep_count" {
+  type        = number
+  description = "Number of Image versions to keep for protected tags"
+  default     = 999999
+}
+
 variable "encryption_configuration" {
   type = object({
     encryption_type = string

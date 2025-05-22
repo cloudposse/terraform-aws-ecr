@@ -106,14 +106,20 @@ locals {
       }
     }
   ]
+
+  lifecycle_rules = concat(
+    local.protected_tag_rules,
+    local.untagged_image_rule,
+    local.remove_old_image_rule
+  )
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
   for_each   = toset(module.this.enabled && var.enable_lifecycle_policy ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
 
-  policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
+  policy = var.lifecycle_policy != "" ? var.lifecycle_policy : jsonencode({
+    rules = local.lifecycle_rules
   })
 }
 

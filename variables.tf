@@ -70,6 +70,12 @@ variable "enable_lifecycle_policy" {
   default     = true
 }
 
+variable "lifecycle_policy" {
+  description = "The policy document. This is a JSON formatted string. See more details about [Policy Parameters](http://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle_policy_parameters) in the official AWS docs"
+  type        = string
+  default     = ""
+}
+
 variable "protected_tags" {
   type        = set(string)
   description = "List of image tags prefixes and wildcards that should not be destroyed. Useful if you tag images with prefixes like `dev`, `staging`, `prod` or wildcards like `*dev`, `*prod`,`*.*.*`"

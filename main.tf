@@ -106,6 +106,30 @@ locals {
       }
     }
   ]
+
+  # Check if any custom rule has tagStatus = "untagged"
+  has_custom_untagged_rule = length([
+    for rule in var.custom_lifecycle_rules : rule
+    if try(rule.selection.tagStatus, "") == "untagged"
+  ]) > 0
+
+  # Only include the default untagged rule if no custom untagged rule exists
+  final_untagged_image_rule = local.has_custom_untagged_rule ? [] : local.untagged_image_rule
+
+  # Prepare all rules that will be included in the policy before assigning priorities
+  all_lifecycle_rules = concat(
+    local.protected_tag_rules,
+    local.final_untagged_image_rule,
+    local.remove_old_image_rule,
+    var.custom_lifecycle_rules
+  )
+
+  # Assign sequential priorities to all rules
+  normalized_rules = [
+    for i, rule in local.all_lifecycle_rules : merge(rule, {
+      rulePriority = i + 1
+    })
+  ]
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
@@ -113,7 +137,7 @@ resource "aws_ecr_lifecycle_policy" "name" {
   repository = aws_ecr_repository.name[each.value].name
 
   policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
+    rules = local.normalized_rules
   })
 }
 

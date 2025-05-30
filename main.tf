@@ -9,14 +9,14 @@ locals {
   organizations_push_non_empty             = length(var.organizations_push_access) > 0
 
   ecr_need_policy = (
-    length(var.principals_full_access)
-    + length(var.principals_readonly_access)
-    + length(var.principals_pull_though_access)
-    + length(var.principals_push_access)
-    + length(var.principals_lambda)
-    + length(var.organizations_readonly_access)
-    + length(var.organizations_full_access)
-    + length(var.organizations_push_access) > 0
+  length(var.principals_full_access)
+  + length(var.principals_readonly_access)
+  + length(var.principals_pull_though_access)
+  + length(var.principals_push_access)
+  + length(var.principals_lambda)
+  + length(var.organizations_readonly_access)
+  + length(var.organizations_full_access)
+  + length(var.organizations_push_access) > 0
   )
 }
 
@@ -106,6 +106,30 @@ locals {
       }
     }
   ]
+
+  # Check if any custom rule has tagStatus = "untagged"
+  has_custom_untagged_rule = length([
+    for rule in var.custom_lifecycle_rules : rule
+    if try(rule.selection.tagStatus, "") == "untagged"
+  ]) > 0
+
+  # Only include the default untagged rule if no custom untagged rule exists
+  final_untagged_image_rule = local.has_custom_untagged_rule ? [] : local.untagged_image_rule
+
+  # Prepare all rules that will be included in the policy before assigning priorities
+  all_lifecycle_rules = concat(
+    local.protected_tag_rules,
+    local.final_untagged_image_rule,
+    local.remove_old_image_rule,
+    var.custom_lifecycle_rules
+  )
+
+  # Assign sequential priorities to all rules
+  normalized_rules = [
+    for i, rule in local.all_lifecycle_rules : merge(rule, {
+      rulePriority = i + 1
+    })
+  ]
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
@@ -113,7 +137,7 @@ resource "aws_ecr_lifecycle_policy" "name" {
   repository = aws_ecr_repository.name[each.value].name
 
   policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
+    rules = local.normalized_rules
   })
 }
 
@@ -340,13 +364,13 @@ data "aws_iam_policy_document" "resource" {
     data.aws_iam_policy_document.resource_readonly_access[0].json
   ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
-    local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", each.value)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.organizations_readonly_access_non_empty ? data.aws_iam_policy_document.organizations_readonly_access[0].json : data.aws_iam_policy_document.empty[0].json,
-    local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
+      local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", each.value)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
+      local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
+      local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+      local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
+      local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+      local.organizations_readonly_access_non_empty ? data.aws_iam_policy_document.organizations_readonly_access[0].json : data.aws_iam_policy_document.empty[0].json,
+      local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
   ])
 }
 

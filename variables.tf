@@ -5,33 +5,33 @@ variable "use_fullname" {
 }
 
 variable "principals_full_access" {
-  type        = list(string)
+  type = list(string)
   description = "Principal ARNs to provide with full access to the ECR"
-  default     = []
+  default = []
 }
 
 variable "principals_push_access" {
-  type        = list(string)
+  type = list(string)
   description = "Principal ARNs to provide with push access to the ECR"
-  default     = []
+  default = []
 }
 
 variable "principals_readonly_access" {
-  type        = list(string)
+  type = list(string)
   description = "Principal ARNs to provide with readonly access to the ECR"
-  default     = []
+  default = []
 }
 
 variable "principals_pull_though_access" {
-  type        = list(string)
+  type = list(string)
   description = "Principal ARNs to provide with pull though access to the ECR"
-  default     = []
+  default = []
 }
 
 variable "principals_lambda" {
-  type        = list(string)
+  type = list(string)
   description = "Principal account IDs of Lambdas allowed to consume ECR"
-  default     = []
+  default = []
 }
 
 variable "scan_images_on_push" {
@@ -53,8 +53,8 @@ variable "time_based_rotation" {
 }
 
 variable "image_names" {
-  type        = list(string)
-  default     = []
+  type = list(string)
+  default = []
   description = "List of Docker local image names, used as repository names for AWS ECR "
 }
 
@@ -71,9 +71,9 @@ variable "enable_lifecycle_policy" {
 }
 
 variable "protected_tags" {
-  type        = set(string)
+  type = set(string)
   description = "List of image tags prefixes and wildcards that should not be destroyed. Useful if you tag images with prefixes like `dev`, `staging`, `prod` or wildcards like `*dev`, `*prod`,`*.*.*`"
-  default     = []
+  default = []
 }
 
 variable "protected_tags_keep_count" {
@@ -100,8 +100,10 @@ variable "force_delete" {
 variable "replication_configurations" {
   description = "Replication configuration for a registry. See [Replication Configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_replication_configuration#replication-configuration)."
   type = list(object({
-    rules = list(object({          # Maximum 10
-      destinations = list(object({ # Maximum 25
+    rules = list(object({
+      # Maximum 10
+      destinations = list(object({
+        # Maximum 25
         region      = string
         registry_id = string
       }))
@@ -115,25 +117,60 @@ variable "replication_configurations" {
 }
 
 variable "organizations_readonly_access" {
-  type        = list(string)
+  type = list(string)
   description = "Organization IDs to provide with readonly access to the ECR."
-  default     = []
+  default = []
 }
 
 variable "organizations_full_access" {
-  type        = list(string)
+  type = list(string)
   description = "Organization IDs to provide with full access to the ECR."
-  default     = []
+  default = []
 }
 
 variable "organizations_push_access" {
-  type        = list(string)
+  type = list(string)
   description = "Organization IDs to provide with push access to the ECR"
-  default     = []
+  default = []
 }
 
 variable "prefixes_pull_through_repositories" {
-  type        = list(string)
+  type = list(string)
   description = "Organization IDs to provide with push access to the ECR"
-  default     = []
+  default = []
+}
+
+variable "custom_lifecycle_rules" {
+  description = "Custom lifecycle rules to override or complement the default ones"
+  type = list(object({
+    rulePriority = number
+    description = optional(string)
+    selection = object({
+      tagStatus   = string
+      countType   = string
+      countNumber = number
+      countUnit = optional(string)
+      tagPrefixList = optional(list(string))
+      tagPatternList = optional(list(string))
+    })
+    action = object({
+      type = string
+    })
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      contains(["tagged", "untagged", "any"], rule.selection.tagStatus)
+    ])
+    error_message = "Valid values for tagStatus are: tagged, untagged, or any."
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      contains(["imageCountMoreThan", "sinceImagePushed"], rule.selection.countType)
+    ])
+    error_message = "Valid values for countType are: imageCountMoreThan or sinceImagePushed."
+  }
 }

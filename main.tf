@@ -9,14 +9,14 @@ locals {
   organizations_push_non_empty             = length(var.organizations_push_access) > 0
 
   ecr_need_policy = (
-  length(var.principals_full_access)
-  + length(var.principals_readonly_access)
-  + length(var.principals_pull_though_access)
-  + length(var.principals_push_access)
-  + length(var.principals_lambda)
-  + length(var.organizations_readonly_access)
-  + length(var.organizations_full_access)
-  + length(var.organizations_push_access) > 0
+    length(var.principals_full_access)
+    + length(var.principals_readonly_access)
+    + length(var.principals_pull_though_access)
+    + length(var.principals_push_access)
+    + length(var.principals_lambda)
+    + length(var.organizations_readonly_access)
+    + length(var.organizations_full_access)
+    + length(var.organizations_push_access) > 0
   )
 }
 
@@ -364,13 +364,13 @@ data "aws_iam_policy_document" "resource" {
     data.aws_iam_policy_document.resource_readonly_access[0].json
   ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
-      local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", each.value)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
-      local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
-      local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
-      local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
-      local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
-      local.organizations_readonly_access_non_empty ? data.aws_iam_policy_document.organizations_readonly_access[0].json : data.aws_iam_policy_document.empty[0].json,
-      local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
+    local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", each.value)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_full_access_non_empty ? data.aws_iam_policy_document.organization_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_readonly_access_non_empty ? data.aws_iam_policy_document.organizations_readonly_access[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.organizations_push_non_empty ? data.aws_iam_policy_document.organization_push_access[0].json : data.aws_iam_policy_document.empty[0].json
   ])
 }
 

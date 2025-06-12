@@ -100,8 +100,10 @@ variable "force_delete" {
 variable "replication_configurations" {
   description = "Replication configuration for a registry. See [Replication Configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_replication_configuration#replication-configuration)."
   type = list(object({
-    rules = list(object({          # Maximum 10
-      destinations = list(object({ # Maximum 25
+    rules = list(object({
+      # Maximum 10
+      destinations = list(object({
+        # Maximum 25
         region      = string
         registry_id = string
       }))
@@ -136,4 +138,39 @@ variable "prefixes_pull_through_repositories" {
   type        = list(string)
   description = "Organization IDs to provide with push access to the ECR"
   default     = []
+}
+
+variable "custom_lifecycle_rules" {
+  description = "Custom lifecycle rules to override or complement the default ones"
+  type = list(object({
+    rulePriority = number
+    description  = optional(string)
+    selection = object({
+      tagStatus      = string
+      countType      = string
+      countNumber    = number
+      countUnit      = optional(string)
+      tagPrefixList  = optional(list(string))
+      tagPatternList = optional(list(string))
+    })
+    action = object({
+      type = string
+    })
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      contains(["tagged", "untagged", "any"], rule.selection.tagStatus)
+    ])
+    error_message = "Valid values for tagStatus are: tagged, untagged, or any."
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      contains(["imageCountMoreThan", "sinceImagePushed"], rule.selection.countType)
+    ])
+    error_message = "Valid values for countType are: imageCountMoreThan or sinceImagePushed."
+  }
 }

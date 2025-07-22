@@ -129,7 +129,7 @@ locals {
     if try(rule.selection.tagStatus, "") != "any"
   ]
   # when we prioritize rules, we want to ensure that any tag status rules come last (e.g. lower priority)
-  sorted_lifecycle_rules = concat(local.other_tag_status_rules, local.any_tag_status_rules, )
+  sorted_lifecycle_rules = concat(local.other_tag_status_rules, local.any_tag_status_rules)
 
   normalized_rules = [
     for i, rule in local.sorted_lifecycle_rules : merge(
@@ -148,7 +148,6 @@ locals {
       }
     )
   ]
-
 
   lifecycle_policy = jsonencode({
     rules = [for rule in local.normalized_rules : rule]

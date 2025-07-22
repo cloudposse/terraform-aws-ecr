@@ -33,17 +33,3 @@ output "repository_arn_map" {
   )
   description = "Map of repository names to repository ARNs"
 }
-
-output "lifecycle_policy_debug" {
-  value = {
-    protected_tag_rules = local.protected_tag_rules
-    untagged_rule       = local.final_untagged_image_rule
-    remove_old          = local.remove_old_image_rule
-    custom              = var.custom_lifecycle_rules
-    all_rules           = local.all_lifecycle_rules
-    normalized          = local.normalized_rules
-    final_json = jsonencode({
-      rules = [for rule in local.normalized_rules : rule]
-    })
-  }
-}

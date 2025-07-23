@@ -143,7 +143,6 @@ variable "prefixes_pull_through_repositories" {
 variable "custom_lifecycle_rules" {
   description = "Custom lifecycle rules to override or complement the default ones"
   type = list(object({
-    rulePriority = number
     description  = optional(string)
     selection = object({
       tagStatus      = string
@@ -158,6 +157,20 @@ variable "custom_lifecycle_rules" {
     })
   }))
   default = []
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.tagStatus != "tagged" || (rule.selection.tagPrefixList > 0 || rule.selection.tagPatternList > 0)
+    ])
+    error_message = "if tagStatus is tagged - specify tagPrefixList or tagPatternList"
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.countNumber > 0
+    ])
+    error_message = "Count number should be > 0"
+  }   
 
   validation {
     condition = alltrue([
@@ -173,4 +186,12 @@ variable "custom_lifecycle_rules" {
     ])
     error_message = "Valid values for countType are: imageCountMoreThan or sinceImagePushed."
   }
+  
+    validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.countType == "imageCountMoreThen"  ||  rule.selection.countUnit != null
+    ])
+    error_message = "For sinceImagePushed countUnit should be specified"
+  } 
 }

@@ -56,18 +56,15 @@ description: |-
 
 # How to use this project
 usage: |-
-  The module creates one or more Elastic Container Registry (ECR) repositories. All repositories created
-  will share the same configuration. Use this module multiple times to create repositories with
-  different configurations.
+  > ![Note]
+  > Please note this module has undergone a major release that changes it from supporting multiple ECR repositories to a single ECR repository.
+  > This is in order to better support customization of each Repository.
+  > 
+  > The ECR Component will still create a single ECR Repository, to create them in mass, we recommend using atmos stacks and inheritance.
 
-  If you provide 1 or more names in `image_names` then one repository will be created for
-  each of the names you provide. Those names can include "namespaces", which are just
-  prefixes ending with a slash (`/`).
+  The module creates a **single** Elastic Container Registry (ECR) repository. 
 
-  If you do not provide any names in `image_names`, the module will create a single ECR repo
-  named `namespace-stage-name` or just `name` depending on the value of `use_fullname`.
-
-  Access to the repositories is granted to via the `principals_full_access` and
+  Access to the repository is granted to via the `principals_full_access` and
   `principals_readonly_access` lists, which are lists of strings that can designate [any valid AWS
   Principal](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#Principal_specifying).
   This module only creates the Repository Policy allowing those Principals access.

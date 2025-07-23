@@ -1,7 +1,6 @@
-variable "use_fullname" {
-  type        = bool
-  default     = true
-  description = "Set 'true' to use `namespace-stage-name` for ecr repository name, else `name`"
+variable "repository_name" {
+  type        = string
+  description = "Name of the ECR repository to create"
 }
 
 variable "principals_full_access" {
@@ -40,46 +39,14 @@ variable "scan_images_on_push" {
   default     = true
 }
 
-variable "max_image_count" {
-  type        = number
-  description = "How many Docker Image versions AWS ECR will store"
-  default     = 500
-}
-
-variable "time_based_rotation" {
-  type        = bool
-  description = "Set to true to filter image based on the `sinceImagePushed` count type."
-  default     = false
-}
-
-variable "image_names" {
-  type        = list(string)
-  default     = []
-  description = "List of Docker local image names, used as repository names for AWS ECR "
-}
-
 variable "image_tag_mutability" {
   type        = string
   default     = "IMMUTABLE"
   description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
-}
-
-variable "enable_lifecycle_policy" {
-  type        = bool
-  description = "Set to false to prevent the module from adding any lifecycle policies to any repositories"
-  default     = true
-}
-
-variable "protected_tags" {
-  type        = set(string)
-  description = "List of image tags prefixes and wildcards that should not be destroyed. Useful if you tag images with prefixes like `dev`, `staging`, `prod` or wildcards like `*dev`, `*prod`,`*.*.*`"
-  default     = []
-}
-
-variable "protected_tags_keep_count" {
-  type        = number
-  description = "Number of Image versions to keep for protected tags"
-  default     = 999999
+  validation {
+    condition     = contains(["MUTABLE", "IMMUTABLE"], var.image_tag_mutability)
+    error_message = "Valid values for image_tag_mutability are: MUTABLE or IMMUTABLE."
+  }
 }
 
 variable "encryption_configuration" {
@@ -100,8 +67,10 @@ variable "force_delete" {
 variable "replication_configurations" {
   description = "Replication configuration for a registry. See [Replication Configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_replication_configuration#replication-configuration)."
   type = list(object({
-    rules = list(object({          # Maximum 10
-      destinations = list(object({ # Maximum 25
+    rules = list(object({
+      # Maximum 10
+      destinations = list(object({
+        # Maximum 25
         region      = string
         registry_id = string
       }))
@@ -136,4 +105,48 @@ variable "prefixes_pull_through_repositories" {
   type        = list(string)
   description = "Organization IDs to provide with push access to the ECR"
   default     = []
+}
+
+variable "lifecycle_rules" {
+  description = "Custom lifecycle rules to override or complement the default ones"
+  type = list(object({
+    priority    = number
+    description = optional(string)
+    selection = list(object({
+      tag_status       = string
+      count_type       = string
+      count_number     = number
+      count_unit       = optional(string)
+      tag_pattern_list = optional(list(string))
+      tag_prefix_list  = optional(list(string))
+    }))
+    action = object({
+      type = string
+    })
+  }))
+  default = []
+
+  validation {
+    condition = alltrue(flatten([
+      for rule in var.lifecycle_rules :
+      [for selection in rule.selection :
+      contains(["tagged", "untagged", "any"], selection.tag_status)]
+    ]))
+    error_message = "Valid values for tag_status are: tagged, untagged, or any."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for rule in var.lifecycle_rules :
+      [for selection in rule.selection :
+      contains(["imageCountMoreThan", "sinceImagePushed"], selection.count_type)]
+    ]))
+    error_message = "Valid values for count_type are: imageCountMoreThan or sinceImagePushed."
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.lifecycle_rules :
+      contains(["expire"], rule.action.type)
+    ])
+    error_message = "Valid values for action.type are: expire."
+  }
 }

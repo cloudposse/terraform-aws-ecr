@@ -20,14 +20,11 @@ locals {
   )
 }
 
-locals {
-  _name       = var.use_fullname ? module.this.id : module.this.name
-  image_names = length(var.image_names) > 0 ? var.image_names : [local._name]
-}
+resource "aws_ecr_repository" "this" {
+  count = module.this.enabled ? 1 : 0
 
-resource "aws_ecr_repository" "name" {
-  for_each             = toset(module.this.enabled ? local.image_names : [])
-  name                 = each.value
+  name = var.repository_name
+
   image_tag_mutability = var.image_tag_mutability
   force_delete         = var.force_delete
 
@@ -46,76 +43,42 @@ resource "aws_ecr_repository" "name" {
   tags = module.this.tags
 }
 
-locals {
-  untagged_image_rule = [
-    {
-      rulePriority = length(var.protected_tags) + 1
-      description  = "Remove untagged images"
-      selection = {
-        tagStatus   = "untagged"
-        countType   = "imageCountMoreThan"
-        countNumber = 1
-      }
-      action = {
-        type = "expire"
-      }
-    }
-  ]
+# Lifecycle Policy ----------------------------------------------
 
-  remove_old_image_rule = [
-    {
-      rulePriority = length(var.protected_tags) + 2
-      description = (
-        var.time_based_rotation ?
-        "Rotate images older than ${var.max_image_count} days old" :
-        "Rotate images when reach ${var.max_image_count} images stored"
-      )
-      selection = merge(
-        {
-          tagStatus = "any"
-          countType = (
-            var.time_based_rotation ?
-            "sinceImagePushed" :
-            "imageCountMoreThan"
-          )
-          countNumber = var.max_image_count
-        },
-        var.time_based_rotation ? { countUnit = "days" } : {}
-      )
-      action = {
-        type = "expire"
-      }
-    }
-  ]
 
-  protected_tag_rules = [
-    for index, tagPattern in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
-    {
-      rulePriority = tonumber(index) + 1
-      description  = "Protects images tagged with ${try(regex("\\Q*\\E", tagPattern), null) == null ? "prefix" : "wildcard"} ${tagPattern}"
-      selection = merge(
-        try(regex("\\Q*\\E", tagPattern), null) == null ? { tagPrefixList = [tagPattern] } : { tagPatternList = [tagPattern] },
-        {
-          tagStatus   = "tagged"
-          countType   = "imageCountMoreThan"
-          countNumber = var.protected_tags_keep_count
+data "aws_ecr_lifecycle_policy_document" "lifecycle_policy" {
+  count = module.this.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+  dynamic "rule" {
+    for_each = var.lifecycle_rules
+    content {
+      priority    = rule.value.priority
+      description = rule.value.description
+      dynamic "selection" {
+        for_each = rule.value.selection
+        content {
+          tag_status       = selection.value.tag_status
+          count_type       = selection.value.count_type
+          count_number     = selection.value.count_number
+          count_unit       = selection.value.count_unit
+          tag_prefix_list  = selection.value.tag_prefix_list
+          tag_pattern_list = selection.value.tag_pattern_list
         }
-      )
-      action = {
-        type = "expire"
+      }
+      action {
+        type = rule.value.action.type
       }
     }
-  ]
+  }
 }
 
-resource "aws_ecr_lifecycle_policy" "name" {
-  for_each   = toset(module.this.enabled && var.enable_lifecycle_policy ? local.image_names : [])
-  repository = aws_ecr_repository.name[each.value].name
+resource "aws_ecr_lifecycle_policy" "this" {
+  count      = module.this.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+  repository = one(aws_ecr_repository.this[*].name)
 
-  policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
-  })
+  policy = one(data.aws_ecr_lifecycle_policy_document.lifecycle_policy[*].json)
 }
+
+# IAM Policy Document ---------------------------------------------
 
 data "aws_iam_policy_document" "empty" {
   count = module.this.enabled ? 1 : 0
@@ -335,12 +298,12 @@ data "aws_iam_policy_document" "organization_push_access" {
 }
 
 data "aws_iam_policy_document" "resource" {
-  for_each = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
+  count = local.ecr_need_policy && module.this.enabled ? 1 : 0
   source_policy_documents = local.principals_readonly_access_non_empty ? [
     data.aws_iam_policy_document.resource_readonly_access[0].json
   ] : [data.aws_iam_policy_document.empty[0].json]
   override_policy_documents = distinct([
-    local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", each.value)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
+    local.principals_pull_through_access_non_empty && contains(var.prefixes_pull_through_repositories, regex("^[a-z][a-z0-9\\-\\.\\_]+", var.repository_name)) ? data.aws_iam_policy_document.resource_pull_through_cache[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_push_access_non_empty ? data.aws_iam_policy_document.resource_push_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_full_access_non_empty ? data.aws_iam_policy_document.resource_full_access[0].json : data.aws_iam_policy_document.empty[0].json,
     local.principals_lambda_non_empty ? data.aws_iam_policy_document.lambda_access[0].json : data.aws_iam_policy_document.empty[0].json,
@@ -350,10 +313,10 @@ data "aws_iam_policy_document" "resource" {
   ])
 }
 
-resource "aws_ecr_repository_policy" "name" {
-  for_each   = toset(local.ecr_need_policy && module.this.enabled ? local.image_names : [])
-  repository = aws_ecr_repository.name[each.value].name
-  policy     = data.aws_iam_policy_document.resource[each.value].json
+resource "aws_ecr_repository_policy" "this" {
+  count      = local.ecr_need_policy && module.this.enabled ? 1 : 0
+  repository = one(aws_ecr_repository.this[*].name)
+  policy     = one(data.aws_iam_policy_document.resource[*].json)
 }
 
 resource "aws_ecr_replication_configuration" "replication_configuration" {

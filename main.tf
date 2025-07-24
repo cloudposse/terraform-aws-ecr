@@ -72,12 +72,8 @@ locals {
       )
       selection = merge(
         {
-          tagStatus = "any"
-          countType = (
-            var.time_based_rotation ?
-            "sinceImagePushed" :
-            "imageCountMoreThan"
-          )
+          tagStatus   = "any"
+          countType   = var.time_based_rotation ? "sinceImagePushed" : "imageCountMoreThan"
           countNumber = var.max_image_count
         },
         var.time_based_rotation ? { countUnit = "days" } : {}
@@ -89,12 +85,13 @@ locals {
   ]
 
   protected_tag_rules = [
-    for index, tagPattern in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) :
-    {
+    for index, tagPattern in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) : {
       rulePriority = tonumber(index) + 1
       description  = "Protects images tagged with ${try(regex("\\Q*\\E", tagPattern), null) == null ? "prefix" : "wildcard"} ${tagPattern}"
       selection = merge(
-        try(regex("\\Q*\\E", tagPattern), null) == null ? { tagPrefixList = [tagPattern] } : { tagPatternList = [tagPattern] },
+        try(regex("\\Q*\\E", tagPattern), null) == null
+        ? { tagPrefixList = [tagPattern] }
+        : { tagPatternList = [tagPattern] },
         {
           tagStatus   = "tagged"
           countType   = "imageCountMoreThan"
@@ -106,15 +103,62 @@ locals {
       }
     }
   ]
+
+  # Check if any custom rule has tagStatus = "untagged"
+  has_custom_untagged_rule = length([
+    for rule in var.custom_lifecycle_rules : rule
+    if try(rule.selection.tagStatus, "") == "untagged"
+  ]) > 0
+
+  # Only include the default untagged rule if no custom untagged rule exists
+  final_untagged_image_rule = local.has_custom_untagged_rule ? [] : local.untagged_image_rule
+
+  # Prepare all rules that will be included in the policy before assigning priorities
+  all_lifecycle_rules = concat(
+    local.protected_tag_rules,
+    local.final_untagged_image_rule,
+    local.remove_old_image_rule,
+    var.custom_lifecycle_rules
+  )
+  any_tag_status_rules = [
+    for rule in local.all_lifecycle_rules : rule
+    if try(rule.selection.tagStatus, "") == "any"
+  ]
+  other_tag_status_rules = [
+    for rule in local.all_lifecycle_rules : rule
+    if try(rule.selection.tagStatus, "") != "any"
+  ]
+  # when we prioritize rules, we want to ensure that any tag status rules come last (e.g. lower priority)
+  sorted_lifecycle_rules = concat(local.other_tag_status_rules, local.any_tag_status_rules)
+
+  normalized_rules = [
+    for i, rule in local.sorted_lifecycle_rules : merge(
+      rule,
+      {
+        rulePriority = i + 1
+        selection = merge(
+          { for k, v in rule.selection : k => v if !(k == "tagPrefixList" || k == "tagPatternList") },
+          length(coalesce(lookup(rule.selection, "tagPrefixList", null), [])) > 0
+          ? { tagPrefixList = coalesce(lookup(rule.selection, "tagPrefixList", null), []) }
+          : {},
+          length(coalesce(lookup(rule.selection, "tagPatternList", null), [])) > 0
+          ? { tagPatternList = coalesce(lookup(rule.selection, "tagPatternList", null), []) }
+          : {}
+        )
+      }
+    )
+  ]
+
+  lifecycle_policy = jsonencode({
+    rules = [for rule in local.normalized_rules : rule]
+  })
 }
 
 resource "aws_ecr_lifecycle_policy" "name" {
   for_each   = toset(module.this.enabled && var.enable_lifecycle_policy ? local.image_names : [])
   repository = aws_ecr_repository.name[each.value].name
 
-  policy = jsonencode({
-    rules = concat(local.protected_tag_rules, local.untagged_image_rule, local.remove_old_image_rule)
-  })
+  policy = local.lifecycle_policy
 }
 
 data "aws_iam_policy_document" "empty" {

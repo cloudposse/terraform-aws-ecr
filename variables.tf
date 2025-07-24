@@ -160,7 +160,7 @@ variable "custom_lifecycle_rules" {
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      rule.selection.tagStatus != "tagged" || (rule.selection.tagPrefixList > 0 || rule.selection.tagPatternList > 0)
+      rule.selection.tagStatus != "tagged" || (length(coalesce(rule.selection.tagPrefixList, [])) > 0 || length(coalesce(rule.selection.tagPatternList, [])) > 0)
     ])
     error_message = "if tagStatus is tagged - specify tagPrefixList or tagPatternList"
   }
@@ -190,8 +190,8 @@ variable "custom_lifecycle_rules" {
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      rule.selection.countType == "imageCountMoreThen" || rule.selection.countUnit != null
+      rule.selection.countType != "sinceImagePushed" || rule.selection.countUnit != null
     ])
-    error_message = "For sinceImagePushed countUnit should be specified"
+    error_message = "For countType = 'sinceImagePushed', countUnit must be specified."
   }
 }

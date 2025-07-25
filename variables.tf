@@ -198,6 +198,7 @@ variable "custom_lifecycle_rules" {
 
 
 variable "default_lifecycle_rules_settings" {
+  description = "Default lifecycle rules settings"
   type = object({
     untagged_image_rule = optional(object({
       enabled = optional(bool, true)

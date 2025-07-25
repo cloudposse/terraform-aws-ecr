@@ -195,3 +195,33 @@ variable "custom_lifecycle_rules" {
     error_message = "For countType = 'sinceImagePushed', countUnit must be specified."
   }
 }
+
+
+variable "default_lifecycle_rules_settings" {
+  type = object({
+    untagged_image_rule = optional(object({
+      enabled      = optional(bool, true)
+      rulePriority = optional(number, null)
+      }), {
+      enabled      = true
+      rulePriority = null
+    })
+    remove_old_image_rule = optional(object({
+      enabled      = optional(bool, true)
+      rulePriority = optional(number, null)
+      }), {
+      enabled      = true
+      rulePriority = null
+    })
+  })
+  default = {
+    untagged_image_rule = {
+      enabled      = true
+      rulePriority = null
+    }
+    remove_old_image_rule = {
+      enabled      = true
+      rulePriority = null
+    }
+  }
+}

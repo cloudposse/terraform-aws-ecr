@@ -49,7 +49,7 @@ resource "aws_ecr_repository" "name" {
 locals {
   untagged_image_rule = var.default_lifecycle_rules_settings.untagged_image_rule.enabled ? [
     {
-      rulePriority = var.default_lifecycle_rules_settings.untagged_image_rule.rulePriority != null ? var.default_lifecycle_rules_settings.untagged_image_rule.rulePriority : length(var.protected_tags) + 1
+      rulePriority = length(var.protected_tags) + 1
       description  = "Remove untagged images"
       selection = {
         tagStatus   = "untagged"
@@ -64,7 +64,7 @@ locals {
 
   remove_old_image_rule = var.default_lifecycle_rules_settings.remove_old_image_rule.enabled ? [
     {
-      rulePriority = var.default_lifecycle_rules_settings.remove_old_image_rule.rulePriority != null ? var.default_lifecycle_rules_settings.remove_old_image_rule.rulePriority : length(var.protected_tags) + 2
+      rulePriority = length(var.protected_tags) + 2
       description = (
         var.time_based_rotation ?
         "Rotate images older than ${var.max_image_count} days old" :

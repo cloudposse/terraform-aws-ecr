@@ -200,28 +200,22 @@ variable "custom_lifecycle_rules" {
 variable "default_lifecycle_rules_settings" {
   type = object({
     untagged_image_rule = optional(object({
-      enabled      = optional(bool, true)
-      rulePriority = optional(number, null)
+      enabled = optional(bool, true)
       }), {
-      enabled      = true
-      rulePriority = null
+      enabled = true
     })
     remove_old_image_rule = optional(object({
-      enabled      = optional(bool, true)
-      rulePriority = optional(number, null)
+      enabled = optional(bool, true)
       }), {
-      enabled      = true
-      rulePriority = null
+      enabled = true
     })
   })
   default = {
     untagged_image_rule = {
-      enabled      = true
-      rulePriority = null
+      enabled = true
     }
     remove_old_image_rule = {
-      enabled      = true
-      rulePriority = null
+      enabled = true
     }
   }
 }

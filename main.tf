@@ -137,12 +137,19 @@ locals {
       {
         rulePriority = i + 1
         selection = merge(
-          { for k, v in rule.selection : k => v if !(k == "tagPrefixList" || k == "tagPatternList") },
+          {
+            for k, v in rule.selection :
+            k => v
+            if !contains(["tagPrefixList", "tagPatternList", "countUnit"], k) || v != null
+          },
           length(coalesce(lookup(rule.selection, "tagPrefixList", null), [])) > 0
           ? { tagPrefixList = coalesce(lookup(rule.selection, "tagPrefixList", null), []) }
           : {},
           length(coalesce(lookup(rule.selection, "tagPatternList", null), [])) > 0
           ? { tagPatternList = coalesce(lookup(rule.selection, "tagPatternList", null), []) }
+          : {},
+          try(rule.selection.countUnit, null) != null
+          ? { countUnit = rule.selection.countUnit }
           : {}
         )
       }

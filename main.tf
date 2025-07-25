@@ -47,7 +47,7 @@ resource "aws_ecr_repository" "name" {
 }
 
 locals {
-  untagged_image_rule = [
+  untagged_image_rule = var.default_lifecycle_rules_settings.untagged_image_rule.enabled ? [
     {
       rulePriority = length(var.protected_tags) + 1
       description  = "Remove untagged images"
@@ -60,9 +60,9 @@ locals {
         type = "expire"
       }
     }
-  ]
+  ] : []
 
-  remove_old_image_rule = [
+  remove_old_image_rule = var.default_lifecycle_rules_settings.remove_old_image_rule.enabled ? [
     {
       rulePriority = length(var.protected_tags) + 2
       description = (
@@ -82,7 +82,7 @@ locals {
         type = "expire"
       }
     }
-  ]
+  ] : []
 
   protected_tag_rules = [
     for index, tagPattern in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) : {

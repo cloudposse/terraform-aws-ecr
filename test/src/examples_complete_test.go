@@ -73,6 +73,4 @@ func TestExamplesCompleteImmutable(t *testing.T) {
 	expectedRepositoryName := "eg-test-ecr-test-" + randId
 	// Verify we're getting back the outputs we expect
 	assert.Equal(t, expectedRepositoryName, repositoryName)
-
-	as
 }

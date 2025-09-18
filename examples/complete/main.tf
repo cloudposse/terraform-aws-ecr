@@ -7,6 +7,20 @@ module "ecr" {
 
   encryption_configuration = var.encryption_configuration
 
+  # Example of using image tag mutability exclusion filters
+  # This allows 'latest' and 'dev-*' tags to be mutable while keeping others immutable
+  image_tag_mutability = "IMMUTABLE"
+  image_tag_mutability_exclusion_filter = [
+    {
+      filter      = "latest"
+      filter_type = "PREFIX_MATCH"
+    },
+    {
+      filter      = "dev-"
+      filter_type = "PREFIX_MATCH"
+    }
+  ]
+
   context = module.this.context
 }
 

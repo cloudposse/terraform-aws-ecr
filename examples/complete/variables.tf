@@ -21,7 +21,7 @@ variable "image_tag_mutability" {
 variable "image_tag_mutability_exclusion_filter" {
   type = list(object({
     filter      = string
-    filter_type = string
+    filter_type = optional(string)
   }))
   default = []
 }

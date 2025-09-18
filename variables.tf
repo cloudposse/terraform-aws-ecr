@@ -64,6 +64,31 @@ variable "image_tag_mutability" {
   description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
 }
 
+variable "image_tag_mutability_exclusion_filter" {
+  type = list(object({
+    filter      = string
+    filter_type = string
+  }))
+  default     = []
+  description = "List of exclusion filters for image tag mutability. Each filter object must contain 'filter' and 'filter_type' attributes. Requires AWS provider >= 6.8.0"
+
+  validation {
+    condition = alltrue([
+      for filter in var.image_tag_mutability_exclusion_filter :
+      contains(["PREFIX_MATCH"], filter.filter_type)
+    ])
+    error_message = "filter_type must be one of: PREFIX_MATCH"
+  }
+
+  validation {
+    condition = alltrue([
+      for filter in var.image_tag_mutability_exclusion_filter :
+      length(trimspace(filter.filter)) > 0
+    ])
+    error_message = "filter value cannot be empty or contain only whitespace."
+  }
+}
+
 variable "enable_lifecycle_policy" {
   type        = bool
   description = "Set to false to prevent the module from adding any lifecycle policies to any repositories"

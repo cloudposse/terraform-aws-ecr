@@ -7,6 +7,19 @@ module "ecr" {
 
   encryption_configuration = var.encryption_configuration
 
+  # Example configuration for image tag mutability exclusion filter
+  # This allows certain tags to be mutable even when the repository is set to IMMUTABLE
+  image_tag_mutability_exclusion_filter = [
+    {
+      tag_status      = "TAGGED"
+      tag_prefix_list = ["dev", "test", "staging"]
+    },
+    {
+      tag_status      = "UNTAGGED"
+      tag_prefix_list = null
+    }
+  ]
+
   context = module.this.context
 }
 

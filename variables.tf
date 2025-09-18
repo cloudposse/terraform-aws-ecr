@@ -64,6 +64,29 @@ variable "image_tag_mutability" {
   description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
 }
 
+variable "image_tag_mutability_exclusion_filter" {
+  type = list(object({
+    tag_status = string
+    tag_prefix_list = optional(list(string))
+  }))
+  description = "List of image tag mutability exclusion filter rules. Each rule specifies tag_status ('TAGGED' or 'UNTAGGED') and optionally tag_prefix_list for TAGGED status. Requires AWS provider >= 6.8.0"
+  default     = []
+  validation {
+    condition = alltrue([
+      for filter in var.image_tag_mutability_exclusion_filter :
+      contains(["TAGGED", "UNTAGGED"], filter.tag_status)
+    ])
+    error_message = "Valid values for tag_status are: TAGGED or UNTAGGED."
+  }
+  validation {
+    condition = alltrue([
+      for filter in var.image_tag_mutability_exclusion_filter :
+      filter.tag_status != "TAGGED" || (filter.tag_prefix_list != null && length(filter.tag_prefix_list) > 0)
+    ])
+    error_message = "For tag_status = 'TAGGED', tag_prefix_list must be specified and non-empty."
+  }
+}
+
 variable "enable_lifecycle_policy" {
   type        = bool
   description = "Set to false to prevent the module from adding any lifecycle policies to any repositories"

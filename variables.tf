@@ -61,7 +61,32 @@ variable "image_names" {
 variable "image_tag_mutability" {
   type        = string
   default     = "IMMUTABLE"
-  description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
+  description = "The tag mutability setting for the repository. Must be one of: `MUTABLE`, `IMMUTABLE`, `IMMUTABLE_WITH_EXCLUSION`, or `MUTABLE_WITH_EXCLUSION`. Defaults to `IMMUTABLE`"
+}
+
+variable "image_tag_mutability_exclusion_filter" {
+  type = list(object({
+    filter      = string
+    filter_type = optional(string, "WILDCARD")
+  }))
+  default     = []
+  description = "List of exclusion filters for image tag mutability. Each filter object must contain 'filter' and 'filter_type' attributes. Requires AWS provider >= 6.8.0"
+
+  validation {
+    condition = alltrue([
+      for filter in var.image_tag_mutability_exclusion_filter :
+      contains(["WILDCARD"], filter.filter_type)
+    ])
+    error_message = "filter_type must be `WILDCARD`"
+  }
+
+  validation {
+    condition = alltrue([
+      for filter in var.image_tag_mutability_exclusion_filter :
+      length(trimspace(filter.filter)) > 0
+    ])
+    error_message = "filter value cannot be empty or contain only whitespace."
+  }
 }
 
 variable "enable_lifecycle_policy" {

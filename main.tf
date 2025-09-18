@@ -39,6 +39,14 @@ resource "aws_ecr_repository" "name" {
     }
   }
 
+  dynamic "image_tag_mutability_exclusion_filter" {
+    for_each = var.image_tag_mutability_exclusion_filter
+    content {
+      filter      = image_tag_mutability_exclusion_filter.value.filter
+      filter_type = image_tag_mutability_exclusion_filter.value.filter_type
+    }
+  }
+
   image_scanning_configuration {
     scan_on_push = var.scan_images_on_push
   }

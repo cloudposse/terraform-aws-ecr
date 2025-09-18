@@ -12,7 +12,6 @@ import (
 
 // Test the Terraform module in examples/complete using Terratest.
 func TestExamplesComplete(t *testing.T) {
-	t.Parallel()
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -44,7 +43,6 @@ func TestExamplesComplete(t *testing.T) {
 }
 
 func TestExamplesCompleteImmutable(t *testing.T) {
-	t.Parallel()
 
 	rand.Seed(time.Now().UnixNano())
 

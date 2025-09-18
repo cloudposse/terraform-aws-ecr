@@ -67,7 +67,7 @@ variable "image_tag_mutability" {
 variable "image_tag_mutability_exclusion_filter" {
   type = list(object({
     filter      = string
-    filter_type = string
+    filter_type = optional(string, "WILDCARD")
   }))
   default     = []
   description = "List of exclusion filters for image tag mutability. Each filter object must contain 'filter' and 'filter_type' attributes. Requires AWS provider >= 6.8.0"

@@ -14,7 +14,8 @@ module "ecr" {
 }
 
 module "scan_config" {
-  source = "../../modules/scanning_configuration"
+  enabled = var.enable_scanning
+  source  = "../../modules/scanning_configuration"
   scan_config = {
     scan_type = "ENHANCED"
     rules = [{

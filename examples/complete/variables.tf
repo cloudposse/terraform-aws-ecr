@@ -26,3 +26,9 @@ variable "image_tag_mutability_exclusion_filter" {
   }))
   default = []
 }
+
+variable "enable_scanning" {
+  type        = bool
+  description = "Set to true to enable scanning for the repository"
+  default     = false
+}

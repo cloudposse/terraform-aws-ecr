@@ -11,12 +11,16 @@ module "ecr" {
   # This allows certain tags to be mutable even when the repository is set to IMMUTABLE
   image_tag_mutability_exclusion_filter = [
     {
-      tag_status      = "TAGGED"
-      tag_prefix_list = ["dev", "test", "staging"]
+      filter      = "dev*"
+      filter_type = "tagPrefixList"
     },
     {
-      tag_status      = "UNTAGGED"
-      tag_prefix_list = null
+      filter      = "test*"
+      filter_type = "tagPrefixList"
+    },
+    {
+      filter      = "UNTAGGED"
+      filter_type = "tagStatus"
     }
   ]
 

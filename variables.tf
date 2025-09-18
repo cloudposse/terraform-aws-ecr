@@ -66,24 +66,17 @@ variable "image_tag_mutability" {
 
 variable "image_tag_mutability_exclusion_filter" {
   type = list(object({
-    tag_status = string
-    tag_prefix_list = optional(list(string))
+    filter      = string
+    filter_type = string
   }))
-  description = "List of image tag mutability exclusion filter rules. Each rule specifies tag_status ('TAGGED' or 'UNTAGGED') and optionally tag_prefix_list for TAGGED status. Requires AWS provider >= 6.8.0"
+  description = "List of image tag mutability exclusion filter rules. Each rule specifies filter (tag value) and filter_type ('tagStatus' or 'tagPrefixList'). Requires AWS provider >= 6.8.0"
   default     = []
   validation {
     condition = alltrue([
       for filter in var.image_tag_mutability_exclusion_filter :
-      contains(["TAGGED", "UNTAGGED"], filter.tag_status)
+      contains(["tagStatus", "tagPrefixList"], filter.filter_type)
     ])
-    error_message = "Valid values for tag_status are: TAGGED or UNTAGGED."
-  }
-  validation {
-    condition = alltrue([
-      for filter in var.image_tag_mutability_exclusion_filter :
-      filter.tag_status != "TAGGED" || (filter.tag_prefix_list != null && length(filter.tag_prefix_list) > 0)
-    ])
-    error_message = "For tag_status = 'TAGGED', tag_prefix_list must be specified and non-empty."
+    error_message = "Valid values for filter_type are: tagStatus or tagPrefixList."
   }
 }
 

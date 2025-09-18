@@ -42,8 +42,8 @@ resource "aws_ecr_repository" "name" {
   dynamic "image_tag_mutability_exclusion_filter" {
     for_each = var.image_tag_mutability_exclusion_filter
     content {
-      tag_status      = image_tag_mutability_exclusion_filter.value.tag_status
-      tag_prefix_list = image_tag_mutability_exclusion_filter.value.tag_prefix_list
+      filter      = image_tag_mutability_exclusion_filter.value.filter
+      filter_type = image_tag_mutability_exclusion_filter.value.filter_type
     }
   }
 

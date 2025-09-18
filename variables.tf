@@ -75,9 +75,9 @@ variable "image_tag_mutability_exclusion_filter" {
   validation {
     condition = alltrue([
       for filter in var.image_tag_mutability_exclusion_filter :
-      contains(["PREFIX_MATCH"], filter.filter_type)
+      contains(["WILDCARD"], filter.filter_type)
     ])
-    error_message = "filter_type must be one of: PREFIX_MATCH"
+    error_message = "filter_type must be `WILDCARD`"
   }
 
   validation {

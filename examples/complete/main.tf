@@ -13,11 +13,11 @@ module "ecr" {
   image_tag_mutability_exclusion_filter = [
     {
       filter      = "latest"
-      filter_type = "PREFIX_MATCH"
+      filter_type = "WILDCARD"
     },
     {
       filter      = "dev-"
-      filter_type = "PREFIX_MATCH"
+      filter_type = "WILDCARD"
     }
   ]
 

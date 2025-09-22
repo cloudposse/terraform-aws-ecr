@@ -94,5 +94,40 @@ usage: |-
   }
   ```
 
+  ### Advanced Usage with Image Tag Mutability Exclusion Filters
+
+  The module supports `image_tag_mutability_exclusion_filter` to exclude specific tags from the repository's image tag mutability setting. This is useful when you want most tags to be immutable but allow certain tag patterns (like `latest`, `dev-*`) to be mutable.
+
+  **Note**: This feature requires AWS provider version >= 6.8.0.
+
+  ```hcl
+  module "ecr_with_exclusions" {
+    source = "cloudposse/ecr/aws"
+    # version = "x.x.x"
+    
+    namespace              = "eg"
+    stage                  = "prod"
+    name                   = "api"
+    image_tag_mutability   = "IMMUTABLE_WITH_EXCLUSION"
+    principals_full_access = [data.aws_iam_role.ecr.arn]
+
+    # Allow 'latest' and 'dev-*' tags to be mutable while keeping others immutable
+    image_tag_mutability_exclusion_filter = [
+      {
+        filter      = "latest"
+        filter_type = "WILDCARD"
+      },
+      {
+        filter      = "dev-"
+        filter_type = "WILDCARD"
+      },
+      {
+        filter      = "feature-"
+        filter_type = "WILDCARD"
+      }
+    ]
+  }
+  ```
+
 include: []
 contributors: []

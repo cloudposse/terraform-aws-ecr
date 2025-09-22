@@ -7,11 +7,15 @@ module "ecr" {
 
   encryption_configuration = var.encryption_configuration
 
+  image_tag_mutability                  = var.image_tag_mutability
+  image_tag_mutability_exclusion_filter = var.image_tag_mutability_exclusion_filter
+
   context = module.this.context
 }
 
 module "scan_config" {
-  source = "../../modules/scanning_configuration"
+  enabled = var.enable_scanning
+  source  = "../../modules/scanning_configuration"
   scan_config = {
     scan_type = "ENHANCED"
     rules = [{

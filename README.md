@@ -123,6 +123,40 @@ module "ecr_with_exclusions" {
 }
 ```
 
+### Advanced Usage with Custom Lifecycle Rules
+
+The module supports `custom_lifecycle_rules` to define advanced image lifecycle policies. You can use the `transition` action to archive images instead of deleting them, which allows for cost-effective long-term retention with lower access latency requirements.
+
+```hcl
+module "ecr_with_archive" {
+  source = "cloudposse/ecr/aws"
+  # version = "x.x.x"
+  
+  namespace              = "eg"
+  stage                  = "prod"
+  name                   = "app"
+  principals_full_access = [data.aws_iam_role.ecr.arn]
+
+  # Archive untagged images after 30 days and delete them after 365 days in archive
+  custom_lifecycle_rules = [
+    {
+      description = "Archive untagged images older than 30 days"
+      selection = {
+        tagStatus      = "untagged"
+        storageClass   = "standard"
+        countType      = "sinceImagePushed"
+        countUnit      = "days"
+        countNumber    = 30
+      }
+      action = {
+        type               = "transition"
+        targetStorageClass = "archive"
+      }
+    }
+  ]
+}
+```
+
 > [!IMPORTANT]
 > In Cloud Posse's examples, we avoid pinning modules to specific versions to prevent discrepancies between the documentation
 > and the latest released versions. However, for your own projects, we strongly advise pinning each module to the exact version
@@ -183,7 +217,7 @@ module "ecr_with_exclusions" {
 | <a name="input_additional_tag_map"></a> [additional\_tag\_map](#input\_additional\_tag\_map) | Additional key-value pairs to add to each map in `tags_as_list_of_maps`. Not added to `tags` or `id`.<br/>This is for some rare cases where resources want additional configuration of tags<br/>and therefore take a list of maps with tag key, value, and additional configuration. | `map(string)` | `{}` | no |
 | <a name="input_attributes"></a> [attributes](#input\_attributes) | ID element. Additional attributes (e.g. `workers` or `cluster`) to add to `id`,<br/>in the order they appear in the list. New attributes are appended to the<br/>end of the list. The elements of the list are joined by the `delimiter`<br/>and treated as a single ID element. | `list(string)` | `[]` | no |
 | <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for attributes, tags, and additional\_tag\_map, which are merged. | `any` | <pre>{<br/>  "additional_tag_map": {},<br/>  "attributes": [],<br/>  "delimiter": null,<br/>  "descriptor_formats": {},<br/>  "enabled": true,<br/>  "environment": null,<br/>  "id_length_limit": null,<br/>  "label_key_case": null,<br/>  "label_order": [],<br/>  "label_value_case": null,<br/>  "labels_as_tags": [<br/>    "unset"<br/>  ],<br/>  "name": null,<br/>  "namespace": null,<br/>  "regex_replace_chars": null,<br/>  "stage": null,<br/>  "tags": {},<br/>  "tenant": null<br/>}</pre> | no |
-| <a name="input_custom_lifecycle_rules"></a> [custom\_lifecycle\_rules](#input\_custom\_lifecycle\_rules) | Custom lifecycle rules to override or complement the default ones. Action type can be 'expire' or 'transition'. Use 'transition' with targetStorageClass='archive' to archive images instead of deleting them. | <pre>list(object({<br/>    description = optional(string)<br/>    selection = object({<br/>      tagStatus      = string<br/>      storageClass   = optional(string, "standard")<br/>      countType      = string<br/>      countNumber    = number<br/>      countUnit      = optional(string)<br/>      tagPrefixList  = optional(list(string))<br/>      tagPatternList = optional(list(string))<br/>    })<br/>    action = object({<br/>      type                = string<br/>      targetStorageClass  = optional(string)<br/>    })<br/>  }))</pre> | `[]` | no |
+| <a name="input_custom_lifecycle_rules"></a> [custom\_lifecycle\_rules](#input\_custom\_lifecycle\_rules) | Custom lifecycle rules to override or complement the default ones. Action type can be 'expire' or 'transition'. Use 'transition' with targetStorageClass='archive' to archive images instead of deleting them. StorageClass can be 'standard' (default) or 'archive'. | <pre>list(object({<br/>    description = optional(string)<br/>    selection = object({<br/>      tagStatus      = string<br/>      storageClass   = optional(string, "standard")<br/>      countType      = string<br/>      countNumber    = number<br/>      countUnit      = optional(string)<br/>      tagPrefixList  = optional(list(string))<br/>      tagPatternList = optional(list(string))<br/>    })<br/>    action = object({<br/>      type                = string<br/>      targetStorageClass  = optional(string)<br/>    })<br/>  }))</pre> | `[]` | no |
 | <a name="input_default_lifecycle_rules_settings"></a> [default\_lifecycle\_rules\_settings](#input\_default\_lifecycle\_rules\_settings) | Default lifecycle rules settings | <pre>object({<br/>    untagged_image_rule = optional(object({<br/>      enabled = optional(bool, true)<br/>      }), {<br/>      enabled = true<br/>    })<br/>    remove_old_image_rule = optional(object({<br/>      enabled = optional(bool, true)<br/>      }), {<br/>      enabled = true<br/>    })<br/>  })</pre> | <pre>{<br/>  "remove_old_image_rule": {<br/>    "enabled": true<br/>  },<br/>  "untagged_image_rule": {<br/>    "enabled": true<br/>  }<br/>}</pre> | no |
 | <a name="input_delimiter"></a> [delimiter](#input\_delimiter) | Delimiter to be used between ID elements.<br/>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
 | <a name="input_descriptor_formats"></a> [descriptor\_formats](#input\_descriptor\_formats) | Describe additional descriptors to be output in the `descriptors` output map.<br/>Map of maps. Keys are names of descriptors. Values are maps of the form<br/>`{<br/>   format = string<br/>   labels = list(string)<br/>}`<br/>(Type is `any` so the map values can later be enhanced to provide additional options.)<br/>`format` is a Terraform format string to be passed to the `format()` function.<br/>`labels` is a list of labels, in order, to pass to `format()` function.<br/>Label values will be normalized before being passed to `format()` so they will be<br/>identical to how they appear in `id`.<br/>Default is `{}` (`descriptors` output will be empty). | `any` | `{}` | no |
@@ -396,7 +430,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 
 ---
-Copyright © 2017-2025 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2026 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 <a href="https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-ecr&utm_content=readme_footer_link"><img alt="README footer" src="https://cloudposse.com/readme/footer/img"/></a>

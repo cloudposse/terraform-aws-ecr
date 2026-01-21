@@ -148,10 +148,11 @@ usage: |-
       {
         description = "Archive untagged images older than 30 days"
         selection = {
-          tagStatus   = "untagged"
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          countNumber = 30
+          tagStatus      = "untagged"
+          storageClass   = "standard"
+          countType      = "sinceImagePushed"
+          countUnit      = "days"
+          countNumber    = 30
         }
         action = {
           type               = "transition"

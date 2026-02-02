@@ -179,8 +179,8 @@ variable "custom_lifecycle_rules" {
       tagPatternList = optional(list(string))
     })
     action = object({
-      type                = string
-      targetStorageClass  = optional(string)
+      type               = string
+      targetStorageClass = optional(string)
     })
   }))
   default = []

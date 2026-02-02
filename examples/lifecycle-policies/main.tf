@@ -1,7 +1,7 @@
 
 module "ecr" {
   source = "../../"
-  name = "test-lifecycle-policies"
+  name   = "test-lifecycle-policies"
 
   encryption_configuration = var.encryption_configuration
 
@@ -9,7 +9,7 @@ module "ecr" {
   image_tag_mutability_exclusion_filter = var.image_tag_mutability_exclusion_filter
   custom_lifecycle_rules = [
     {
-      description   = "Expire untagged images older than 30 days"
+      description = "Expire untagged images older than 30 days"
       selection = {
         tagStatus   = "untagged"
         countType   = "sinceImagePushed"
@@ -17,7 +17,7 @@ module "ecr" {
         countNumber = 30
       }
       action = {
-        type = "transition"
+        type               = "transition"
         targetStorageClass = "archive"
       }
     }

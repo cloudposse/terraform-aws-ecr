@@ -298,7 +298,7 @@ variable "default_lifecycle_rules_settings" {
   type = object({
     protected_tag_rules = optional(object({
       enabled = optional(bool, true)
-    }), {
+      }), {
       enabled = true
     })
     untagged_image_rule = optional(object({

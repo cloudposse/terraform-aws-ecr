@@ -92,7 +92,7 @@ locals {
     }
   ] : []
 
-  protected_tag_rules = [
+  protected_tag_rules = var.default_lifecycle_rules_settings.protected_tag_rules.enabled ? [
     for index, tagPattern in zipmap(range(length(var.protected_tags)), tolist(var.protected_tags)) : {
       rulePriority = tonumber(index) + 1
       description  = "Protects images tagged with ${try(regex("\\Q*\\E", tagPattern), null) == null ? "prefix" : "wildcard"} ${tagPattern}"
@@ -110,7 +110,7 @@ locals {
         type = "expire"
       }
     }
-  ]
+  ] : []
 
   # Check if any custom rule has tagStatus = "untagged"
   has_custom_untagged_rule = length([

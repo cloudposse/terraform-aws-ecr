@@ -191,6 +191,7 @@ variable "custom_lifecycle_rules" {
     ])
     error_message = "if tagStatus is tagged - specify tagPrefixList or tagPatternList"
   }
+
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
@@ -206,20 +207,45 @@ variable "custom_lifecycle_rules" {
     ])
     error_message = "Valid values for tagStatus are: tagged, untagged, or any."
   }
+
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      contains(["imageCountMoreThan", "sinceImagePushed"], rule.selection.countType)
+      contains(["imageCountMoreThan", "sinceImagePushed", "sinceImagePulled", "sinceImageTransitioned"], rule.selection.countType)
     ])
-    error_message = "Valid values for countType are: imageCountMoreThan or sinceImagePushed."
+    error_message = "Valid values for countType are: imageCountMoreThan, sinceImagePushed, sinceImagePulled, or sinceImageTransitioned."
   }
 
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      rule.selection.countType != "sinceImagePushed" || rule.selection.countUnit != null
+      !contains(["sinceImagePushed", "sinceImagePulled", "sinceImageTransitioned"], rule.selection.countType) || rule.selection.countUnit != null
     ])
-    error_message = "For countType = 'sinceImagePushed', countUnit must be specified."
+    error_message = "For countType values of sinceImagePushed, sinceImagePulled, or sinceImageTransitioned, countUnit must be specified (e.g., 'days')."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.countUnit == null || contains(["days"], rule.selection.countUnit)
+    ])
+    error_message = "Valid values for countUnit are: 'days'"
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.storageClass != "archive" || contains(["sinceImageTransitioned", "imageCountMoreThan"], rule.selection.countType)
+    ])
+    error_message = "When storageClass = 'archive', only countType values 'sinceImageTransitioned' or 'imageCountMoreThan' are allowed."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.storageClass != "standard" || !contains(["sinceImageTransitioned"], rule.selection.countType)
+    ])
+    error_message = "countType 'sinceImageTransitioned' can only be used with storageClass = 'archive'. It tracks time since images were transitioned to archive."
   }
 
   validation {
@@ -245,12 +271,36 @@ variable "custom_lifecycle_rules" {
     ])
     error_message = "Valid values for storageClass are: standard or archive. Defaults to standard."
   }
+
+  validation {
+    condition = alltrue([
+      for storage_class in ["standard", "archive"] :
+      length([
+        for rule in var.custom_lifecycle_rules :
+        rule if rule.selection.tagStatus == "any" && rule.selection.storageClass == storage_class
+      ]) <= 1
+    ])
+    error_message = "You can have at most one rule with tagStatus = 'any' per storage class (standard and archive)."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.tagStatus != "tagged" || rule.selection.storageClass != "archive"
+    ])
+    error_message = "tagStatus = 'tagged' cannot be used with storageClass = 'archive'."
+  }
 }
 
 
 variable "default_lifecycle_rules_settings" {
   description = "Default lifecycle rules settings"
   type = object({
+    protected_tag_rules = optional(object({
+      enabled = optional(bool, true)
+      }), {
+      enabled = true
+    })
     untagged_image_rule = optional(object({
       enabled = optional(bool, true)
       }), {
@@ -263,6 +313,9 @@ variable "default_lifecycle_rules_settings" {
     })
   })
   default = {
+    protected_tag_rules = {
+      enabled = true
+    }
     untagged_image_rule = {
       enabled = true
     }

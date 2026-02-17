@@ -1,6 +1,7 @@
 # ECR Scanning Configuration
 
 
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 <!-- markdownlint-disable -->
 ## Requirements
@@ -59,5 +60,6 @@
 | <a name="output_configuration"></a> [configuration](#output\_configuration) | The ECR registry scanning configuration |
 <!-- markdownlint-restore -->
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
 
 

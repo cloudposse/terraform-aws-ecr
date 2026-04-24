@@ -49,14 +49,16 @@ module "ecr" {
         targetStorageClass = "archive"
       }
     },
-    # Feature (v1.0.1): expire from archive storage class.
+    # Feature (v1.0.1): expire from archive storage class. ECR only accepts
+    # countType=sinceImageTransitioned when selection.storageClass=archive,
+    # and enforces a 90-day minimum before archived images can be deleted.
     {
-      description = "Expire archived images older than 90 days"
+      description = "Expire images that have been archived for more than 90 days"
       selection = {
         tagStatus     = "tagged"
         tagPrefixList = ["v"]
         storageClass  = "archive"
-        countType     = "sinceImagePushed"
+        countType     = "sinceImageTransitioned"
         countUnit     = "days"
         countNumber   = 90
       }

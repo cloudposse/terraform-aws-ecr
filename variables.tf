@@ -166,12 +166,12 @@ variable "prefixes_pull_through_repositories" {
 }
 
 variable "custom_lifecycle_rules" {
-  description = "Custom lifecycle rules to override or complement the default ones. Action type can be 'expire' or 'transition'. Use 'transition' with targetStorageClass='archive' to archive images instead of deleting them. StorageClass can be 'standard' (default) or 'archive'."
+  description = "Custom lifecycle rules to override or complement the default ones. Action type can be 'expire' or 'transition'. Use 'transition' with targetStorageClass='archive' to archive images instead of deleting them. StorageClass can be 'standard' or 'archive' and is omitted from the rendered policy when not set."
   type = list(object({
     description = optional(string)
     selection = object({
       tagStatus      = string
-      storageClass   = optional(string, "standard")
+      storageClass   = optional(string)
       countType      = string
       countNumber    = number
       countUnit      = optional(string)
@@ -241,9 +241,9 @@ variable "custom_lifecycle_rules" {
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      contains(["standard", "archive"], rule.selection.storageClass)
+      rule.selection.storageClass == null || contains(["standard", "archive"], rule.selection.storageClass)
     ])
-    error_message = "Valid values for storageClass are: standard or archive. Defaults to standard."
+    error_message = "Valid values for storageClass are: standard or archive. Omit to not include storageClass in the rendered policy."
   }
 }
 

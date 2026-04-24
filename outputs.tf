@@ -33,3 +33,8 @@ output "repository_arn_map" {
   )
   description = "Map of repository names to repository ARNs"
 }
+
+output "lifecycle_policy_json" {
+  value       = module.this.enabled && var.enable_lifecycle_policy ? local.lifecycle_policy : null
+  description = "JSON-encoded ECR lifecycle policy applied to the repositories (null when lifecycle policy is disabled)"
+}

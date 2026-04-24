@@ -148,7 +148,7 @@ locals {
           {
             for k, v in rule.selection :
             k => v
-            if !contains(["tagPrefixList", "tagPatternList", "countUnit"], k) || v != null
+            if !contains(["tagPrefixList", "tagPatternList", "countUnit", "storageClass"], k) || v != null
           },
           length(coalesce(lookup(rule.selection, "tagPrefixList", null), [])) > 0
           ? { tagPrefixList = coalesce(lookup(rule.selection, "tagPrefixList", null), []) }
@@ -158,8 +158,16 @@ locals {
           : {},
           try(rule.selection.countUnit, null) != null
           ? { countUnit = rule.selection.countUnit }
+          : {},
+          try(rule.selection.storageClass, null) != null
+          ? { storageClass = rule.selection.storageClass }
           : {}
         )
+        action = {
+          for k, v in rule.action :
+          k => v
+          if v != null
+        }
       }
     )
   ]
